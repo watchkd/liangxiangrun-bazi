@@ -238,7 +238,7 @@ python tools/corpus_search.py --list
 **先读**
 - `DISCLAIMER.md`：**使用限制与免责**（禁止收费欺诈／歧视性决策／替代医疗／去除出处；责任限制；个人信息；权利人异议）。
 - `LICENSE.md`：三层许可——自撰部分 CC BY-NC-SA 4.0、原书归原作者、古籍按其点校本。
-- `README.md`：交付说明、运行环境（Python ≥ 3.7、纯标准库、不联网）、数据规模、已知边界。
+- `README.md`：交付说明、运行环境（Python ≥ 3.7、纯标准库、不联网）、数据规模。
 
 **决策与口径**
 - `references/merge/DECISIONS.md`：**融合决策记录**，15 条冲突的裁决与理由。有疑先查此件。
