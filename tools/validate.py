@@ -59,7 +59,7 @@ REQUIRED_FILES = [
     "data/conflicts.csv", "data/unresolved_register.csv", "data/crosswalk.csv",
     "data/source_manifest.csv", "data/glossary.csv", "data/ocr_corrections.csv",
     "data/coverage_audit.csv", "data/video_episode_map.csv", "data/_integration_stats.json",
-    "data/quotes_verify.txt", "data/corpus_digest.csv", "data/xingqing.csv", "data/liuqin.csv",
+    "data/corpus_digest.csv", "data/xingqing.csv", "data/liuqin.csv",
     "data/point_rules.csv", "tools/trace_audit.py", "_命书/一致率报告.md",
     "data/jinbuhuan_ocr_notes.csv",
     "tools/analyze.py", "tools/validate.py",
@@ -1056,6 +1056,12 @@ def check_corpus(skip):
         rec("R", "R18", True, "已按参数跳过六书台账", warn_only=True)
         rec("R", "R19", True, "已按参数跳过检索器", warn_only=True)
         return
+    if not os.path.exists(VERIFY_DB):
+        # 全文类底本不随包分发（版权）：公开仓克隆环境无核验库，
+        # 台账与检索器都以其为底，两项记 skip——本地全量环境照常跑。
+        rec("R", "R18", True, "引文核验库未随包分发（版权），六书台账跳过", warn_only=True)
+        rec("R", "R19", True, "引文核验库未随包分发（版权），检索器跳过", warn_only=True)
+        return
     idx = os.path.join(ROOT, "references", "corpus", "INDEX.md")
     if not os.path.exists(idx):
         rec("R", "R18", False, "references/corpus/INDEX.md 不存在（六书台账缺失）")
@@ -1532,6 +1538,11 @@ def check_doc_claims(counts):
     只查「当前状态」文档；CHANGELOG／PATCH_SUMMARY／TOTAL_ASSEMBLY 属历史记录，
     允许保留当时的数字。
     """
+    if not os.path.exists(VERIFY_DB):
+        # 公开仓克隆环境（引文核验库未随包分发）少两项 R 记录，数字天然对不上
+        # 本地全量环境——非全量环境跳过对账，不算漂移。
+        rec("C", "C07", True, "非全量环境（核验库未随包分发），数字对账跳过", warn_only=True)
+        return
     # C07 自身尚未入 RESULTS，故总数与 PASS 数各 +1
     total = len(RESULTS) + 1
     n_pass = sum(1 for x in RESULTS if x[2] == "PASS") + 1
@@ -1886,13 +1897,16 @@ def check_quote_fidelity(counts):
     同时检查 conditions 的可判定性前缀，以及全文文件本身在不在。
     """
     bad = []
+    skipped = []
     tally = []
     _, rules = load("rules.csv")
     _, cases = load("cases.csv")
 
     for sid, bid, pat, mode, book in QUOTE_SOURCES:
         if not os.path.exists(VERIFY_DB):
-            bad.append("data/quotes_verify.txt 不存在（引文核验库缺失）")
+            # 全文类底本不随包分发（版权）：公开仓无此件，本地研究环境有。
+            # 缺件时本项记 skip，不算 FAIL——结构与自洽不受影响。
+            skipped.append(book)
             continue
         # 全书已改为「引文核验库」：只收被引处及其上下文，未引之处不留一字。
         # 故本项由「引文能在全书中找到」变为「引文能在核验库中找到」——
@@ -1980,8 +1994,10 @@ def check_quote_fidelity(counts):
                 tally.append(f"{book}判例 {k} 例")
 
     rec("C", "C10", not bad,
-        ("、".join(tally) + "：引文与全文逐字一致、判例字段可回溯、条件前缀齐备") if not bad
-        else "引文保真失败：" + "；".join(bad[:6]))
+        ("、".join(tally) + "：引文与全文逐字一致、判例字段可回溯、条件前缀齐备")
+        if not bad and not skipped else
+        ("引文核验库未随包分发（版权），逐字比对本地执行时再跑" if not bad and skipped
+         else "引文保真失败：" + "；".join(bad[:6])))
     return not bad
 
 
