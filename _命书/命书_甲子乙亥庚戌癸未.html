@@ -1,0 +1,529 @@
+<!DOCTYPE html>
+<html lang="zh-Hans">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>命书　甲子　乙亥　庚戌　癸未</title>
+<style>
+  :root{
+    --paper:#fbf9f3; --ink:#1b1a17; --ink2:#4a463f; --red:#8c1c13;
+    --line:#c9c1ae; --soft:#efe9db;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0; padding:0 0 60px;
+    background:#e8e4da;
+    font-family:"Songti SC","SimSun","Source Han Serif SC","Noto Serif CJK SC",serif;
+    color:var(--ink); line-height:1.9; font-size:15.5px;
+  }
+  .sheet{
+    max-width:820px; margin:28px auto; background:var(--paper);
+    padding:48px 52px 64px; box-shadow:0 2px 24px rgba(0,0,0,.14);
+    border-top:6px solid var(--red);
+  }
+  header{text-align:center; margin-bottom:8px;}
+  .kicker{font-size:12.5px; letter-spacing:.5em; color:var(--red); margin-bottom:18px;}
+  h1{font-size:40px; letter-spacing:.18em; margin:0 0 6px; font-weight:600;}
+  .sub{font-size:13px; color:var(--ink2); letter-spacing:.2em;}
+  .bazi{
+    margin:26px auto 8px; border-collapse:collapse; font-size:22px;
+    letter-spacing:.08em;
+  }
+  .bazi td{border:1px solid var(--line); padding:10px 22px; background:#fff;}
+  .bazi td:first-child{background:var(--soft); font-size:13px; letter-spacing:.1em; color:var(--ink2);}
+  .meta{text-align:center; font-size:13px; color:var(--ink2); margin-bottom:34px;}
+  blockquote{
+    margin:0 0 34px; padding:14px 18px; background:#f4efe3;
+    border-left:3px solid var(--red); font-size:13.5px; color:var(--ink2);
+    line-height:1.85;
+  }
+  h2{
+    font-size:19px; letter-spacing:.14em; margin:0 0 18px; padding-bottom:10px;
+    border-bottom:1px solid var(--line); font-weight:600;
+    display:flex; align-items:center;
+  }
+  /* 编号做成朱红胶囊章。两字编号（十一…）用胶囊不用正圆，免得挤变形。 */
+  h2 .no{
+    background:var(--red); color:#fff; border-radius:14px; min-width:28px; height:26px;
+    padding:0 9px; margin-right:.55em; font-size:14px; letter-spacing:.05em;
+    display:inline-flex; align-items:center; justify-content:center; flex-shrink:0;
+  }
+  /* 每节一张卡：白底细边浅影，节与节之间有呼吸，滚动阅读有落点。 */
+  .sec{
+    background:#fff; border:1px solid var(--line); border-radius:8px;
+    padding:28px 32px 20px; margin:0 0 26px; box-shadow:0 1px 8px rgba(0,0,0,.05);
+  }
+  h3{font-size:15.5px; margin:26px 0 8px; letter-spacing:.1em; color:var(--red); font-weight:600;}
+  p{margin:0 0 14px; text-align:justify; text-indent:2em;}
+  p.flat{text-indent:0;}
+  table{width:100%; border-collapse:collapse; margin:18px 0 22px; font-size:13.5px; line-height:1.7;}
+  th,td{border:1px solid var(--line); padding:8px 10px; text-align:center;}
+  th{background:var(--soft); font-weight:600; letter-spacing:.06em;}
+  td.l{text-align:left;}
+  .hi{color:var(--red); font-weight:600;}
+  .note{font-size:13px; color:var(--ink2);}
+  .yun{border-left:2px solid var(--line); padding:2px 0 2px 20px; margin:0 0 22px;}
+  /* 只命中小目标题（.yun 的直接子 b）。若写成 .yun b，正文里的行内强调
+     也会变成块级，句子被拦腰截断——参考范文 HTML 亦有此误。 */
+  .yun > b{display:block; font-size:15px; letter-spacing:.1em; margin-bottom:6px;}
+  .yun p{text-indent:0; margin:0 0 10px;}
+  ol.yao{margin:0 0 14px; padding-left:0; list-style:none; counter-reset:y;}
+  ol.yao li{position:relative; padding-left:2.4em; margin-bottom:14px; text-align:justify;}
+  ol.yao li:before{
+    counter-increment:y; content:counter(y,upper-roman);
+    position:absolute; left:0; top:0; color:var(--red); font-size:13px; letter-spacing:.05em;
+  }
+  ul.plain{margin:0 0 14px; padding-left:1.6em;}
+  ul.plain li{margin-bottom:8px; text-align:justify;}
+  footer{margin-top:52px; padding-top:18px; border-top:1px solid var(--line);
+    font-size:12.5px; color:var(--ink2); line-height:1.8; text-align:center; letter-spacing:.2em;}
+  /* ── 推广尾注：与正文分隔的独立收尾，正文与推广互不混 ── */
+  .promo{margin-top:46px; border:1px solid var(--line); background:#fdf9f0;
+    padding:28px 30px 24px; text-align:center;}
+  .promo p{font-size:13.5px; line-height:2; color:var(--ink); text-align:center; margin:0 0 10px;}
+  .promo img{width:172px; height:172px; background:#fff; border:1px solid var(--line);
+    padding:8px; margin:10px 0 6px;}
+  .promo .lnk{font-size:13px; letter-spacing:.05em;}
+  .promo .disc{font-size:11.5px; color:var(--ink2); margin-top:10px; letter-spacing:.1em;}
+  /* ── 视觉借自报告模板：四柱竖牌、五行条、朱印章。仍是宣纸书卷体。 ── */
+  .pillars{display:flex; justify-content:center; gap:14px; margin:26px 0 4px; flex-wrap:wrap;}
+  .pillar{background:#fff; border:1px solid var(--line); border-top:3px solid var(--red);
+    padding:14px 26px 12px; text-align:center; box-shadow:0 1px 6px rgba(0,0,0,.05); min-width:96px;}
+  .pillar .pos{font-size:12px; color:var(--ink2); letter-spacing:.3em; margin-bottom:6px;}
+  .pillar .gz{font-size:30px; letter-spacing:.1em; font-weight:600;}
+  .pillar .tg{font-size:12px; color:var(--red); margin-top:6px; letter-spacing:.12em;}
+  .wx{margin:4px 0 2px;}
+  .wx .lab{display:inline-block; width:2.4em; font-weight:600;}
+  .wx .bar{display:inline-block; height:13px; border-radius:3px; vertical-align:middle; margin:0 10px; min-width:6px;}
+  .wx .n{font-size:12.5px; color:var(--ink2);}
+  .c-jin{background:#cdb03a;} .c-mu{background:#6da35f;} .c-shui{background:#5f8fb4;}
+  .c-huo{background:#bf4536;} .c-tu{background:#b08a5a;}
+  .tag{display:inline-block; border:1px solid var(--red); color:var(--red); border-radius:3px;
+    padding:1px 9px; font-size:12px; letter-spacing:.18em; margin:0 6px; vertical-align:middle; background:#fdf6ee;}
+  .tag.full{border-color:#b08a5a; color:#7a5c33; background:#f8f2e6;}
+  /* 大运小目的「当前所行」徽章：实底朱红白字，一眼锁定如今走到哪一步。 */
+  .tag.now{background:var(--red); color:#fff; border-color:var(--red); margin-left:.6em;}
+  .yun.now{border-left:2px solid var(--red); background:#fdf9f2; padding-left:18px; border-radius:0 4px 4px 0;}
+  /* 长表折叠：屏幕上默认收起，点开细看；打印时一律展开（浏览器打印 closed
+     details 会整块不渲染，故用 CSS 强制展开）。 */
+  details{margin:18px 0 10px; border:1px solid var(--line); border-radius:6px; overflow:hidden; background:#fdfbf5;}
+  details summary{cursor:pointer; padding:10px 16px; font-size:13px; letter-spacing:.1em;
+    color:var(--red); background:var(--soft); user-select:none;}
+  details[open] summary{border-bottom:1px solid var(--line);}
+  details table{margin:10px 0;}
+  @media (max-width:720px){
+    .sheet{padding:24px 14px 48px; margin:0;}
+    .sec{padding:20px 16px 14px;}
+  }
+  @media print{
+    body{background:#fff;} .sheet{box-shadow:none; margin:0; max-width:none; padding:24mm 20mm;}
+    .sec{box-shadow:none; border:none; padding:0 0 10px; margin:0 0 14px;}
+    details > *{display:block !important;}   /* 打印须展开备查表 */
+  }
+</style>
+</head>
+<body>
+<div class="sheet">
+
+<header>
+<div class="kicker">细　批　终　身</div>
+<h1>命　书</h1>
+<div class="sub">依梁湘润批例体例</div>
+</header>
+
+<div class="pillars">
+<div class="pillar"><div class="pos">年柱</div><div class="gz">甲子</div><div class="tg">偏财</div></div>
+<div class="pillar"><div class="pos">月柱</div><div class="gz">乙亥</div><div class="tg">正财</div></div>
+<div class="pillar"><div class="pos">日柱</div><div class="gz">庚戌</div><div class="tg">日主</div></div>
+<div class="pillar"><div class="pos">时柱</div><div class="gz">癸未</div><div class="tg">伤官</div></div>
+</div>
+<div class="meta">乾造　一九八四年生（甲子年）　10岁起运　今年二〇二六（丙午），虚岁四十三，行己卯运</div>
+<div class="meta" style="margin-top:-26px;">公历1984-11-12 14:45（真太阳时14:44）· 广东梅州</div>
+
+<div class="sec">
+<h2>命式</h2>
+<p class="flat" style="text-align:center;"><span class="tag">魁　罡</span></p>
+<table>
+<tr><th>柱</th><th>干支</th><th>天干十神</th><th>藏干·十神</th><th>本气</th></tr>
+<tr><td>年</td><td>甲子</td><td>偏财</td><td class="l">癸·伤官</td><td>癸</td></tr>
+<tr><td>月</td><td>乙亥</td><td>正财</td><td class="l">壬·食神／甲·偏财</td><td>壬</td></tr>
+<tr><td>日</td><td>庚戌</td><td>日主</td><td class="l">戊·偏印／辛·劫财／丁·正官</td><td>戊</td></tr>
+<tr><td>时</td><td>癸未</td><td>伤官</td><td class="l">己·正印／丁·正官／乙·正财</td><td>己</td></tr>
+</table>
+<h3>长生十二宫　各干于四支之气</h3>
+<table>
+<tr><th>干</th><th>年支 子</th><th>月支 亥</th><th>日支 戌</th><th>时支 未</th></tr>
+<tr><td>庚（日主）</td><td>死</td><td>病</td><td>衰</td><td>冠带</td></tr>
+<tr><td>甲</td><td>沐浴</td><td>长生</td><td>养</td><td>墓</td></tr>
+<tr><td>乙</td><td>病</td><td>死</td><td>墓</td><td>养</td></tr>
+<tr><td>癸</td><td class="hi">临官</td><td class="hi">帝旺</td><td>衰</td><td>墓</td></tr>
+</table>
+<p><b>五行</b>：木四、火二、土二、金二、水三（天干＋藏干等权计）。<span class="hi">五行不缺。</span></p>
+<div style="margin:10px 0 16px;">
+<div class="wx"><span class="lab">木</span><span class="bar c-mu" style="width:150px"></span><span class="n">四字</span></div>
+<div class="wx"><span class="lab">火</span><span class="bar c-huo" style="width:75px"></span><span class="n">二字</span></div>
+<div class="wx"><span class="lab">土</span><span class="bar c-tu" style="width:75px"></span><span class="n">二字</span></div>
+<div class="wx"><span class="lab">金</span><span class="bar c-jin" style="width:75px"></span><span class="n">二字</span></div>
+<div class="wx"><span class="lab">水</span><span class="bar c-shui" style="width:112px"></span><span class="n">三字</span></div>
+</div>
+<p><b>阴阳</b>：四柱八字之中，阳四、阴四，不偏。</p>
+</div>
+
+<div class="sec">
+<h2>已知因</h2>
+<ol class="yao">
+<li>日主庚金，生亥月，冬生。</li>
+<li>月令亥，本气壬为食神，中气甲为偏财；本气不透干，余气甲透年干。</li>
+<li>天干：年甲（偏财），月乙（正财），日庚（日主），时癸（伤官）。</li>
+<li>天干五合：乙月与庚日合。阳日主对正财，连克带合。</li>
+<li>地支：子、亥、戌、未。日支戌本气戊（偏印），时支未本气己（正印）。</li>
+<li>官星：天干不透；正官丁藏于戌、未，两见而不透；七杀不见。</li>
+<li>刑冲合会：子未六害（年、时）；戌未三刑不全（日、时）；四柱无冲。</li>
+<li>日主根气：庚在子死、亥病、戌衰、未冠带，四柱无临官、无帝旺。</li>
+<li>调候：庚日生亥月，表列丁、丙——同气不同性，各挂其神：丁（正官）、丙（七杀）；用时先分口气，先后次序由批者依原文定。</li>
+<li>拱夹：四柱无拱夹。相邻之二支不相隔，相隔者又隔两支以上。</li>
+<li>日柱庚戌，魁罡。</li>
+<li>戌亥二字齐，为天罗。</li>
+</ol>
+</div>
+
+<div class="sec">
+<h2><span class="no">一</span>排盘所据</h2>
+<p>先把盘怎么排出来的交代清楚，复核的人才验得了：</p>
+<p>公历一九八四年十一月十二日十四时四十五分，男，广东梅州——经度一百一十六度一分，真太阳时十四时四十四分。立冬之后，入亥月，冬生。日柱庚戌：以一九四九年十月一日甲子日为锚反查，一九八四年亥月逢庚戌之日唯十一月十二日，日柱唯一。未时遁得时柱癸未。距大雪约二十五日，折起运八年有余，交运一九九三年二月，虚岁十。阳年男命，大运顺行。</p>
+<p>公历、时辰、经度、日柱唯一性，四处任一有出入，全盘重排。命主核过：时辰无错，四柱无误。</p>
+</div>
+
+<div class="sec">
+<h2><span class="no">二</span>总评</h2>
+<p>贵造庚金生于亥月，冬令金寒，水旺而金不暖。这一个八字，头一件要紧的是火——丁、丙二字。</p>
+<p>丁藏在戌，又藏在未，两处有根，都不透干；丙则四柱全无。<b>调候有根而无锋</b>：不至冷到底，也不能一气呵成。所以这一生的成就不在「能不能」，在「迟速」——凡事要等运来推，不能自己走在前头。</p>
+<p><b>丁与丙不是同一个字，先把这一层钉死</b>：丁是正官，阴柔制金而成暖；丙是七杀，阳烈而攻身。调候取用<b>先丁后丙，甲木为佐</b>——先丁，取其暖而能制金；丙只作旁暖，身不畏其暖、反畏其攻。往后凡行运流年透丁，批正官一面（名分、官事）；透丙，必兼批七杀一面（攻身、争斗、官非）——同一味火，两样口气，这一层分不清，吉凶就反了。</p>
+<p>最容易批错的一处，是身强弱。四柱无申无酉，庚金无禄无旺，看着像无根；亥水泄庚、又生壬水，看着像克泄交加。这两句话在你这一个八字都用不得。冬生的人以调候为第一，本来就没有身强身弱的问题。<b>无根不等于贫贱，泄气不等于身弱。</b>这一分际错，满盘皆错。</p>
+<p>月令亥，所藏壬、甲。壬是食神，不透；甲是偏财，透在年干，又在亥为长生。<b>格取偏财。</b></p>
+<p>也有人会说是食神格，那是照月支本气一路看的。是什么格不要紧，要紧的是这一句：<b>你的财是拿本事换的，不是拿位子换的。</b>官星丁藏而不透，印星戊己也藏而不透，官印两不显——仕途上你没有分，这一条早认，省得白耗年月。</p>
+<p>年上偏财，主发迹他乡。这一句与后头「财在动不在静」是一件事，不是两件。</p>
+<p>日柱庚戌，是魁罡。魁罡的人性重、有操持、为人聪敏，权重而害六亲。这一条你自己对，不必我多说。</p>
+<p>十岁起运（一九九三年二月交运，虚岁十），顺行。逐运看，财地在戊寅、己卯两步（三十至四十九岁）；丙子是水地、丁丑是湿土，都不算财地。五十岁以后入墓库，作停顿论，不作破败论；六十岁辛巳，是这一生唯一要预先布置的一步。</p>
+</div>
+
+<div class="sec">
+<h2><span class="no">三</span>妻</h2>
+<p>以乙正财为妻。乙透月干，<b>与日主庚合</b>——乙庚合，阳日主对正财，是连克带合。妻星贴身而合，主婚早，或配偶近在咫尺：同乡、同学、同事之属。</p>
+<p>乙坐亥为死，根只剩未中一点余气，<b>妻星虚而不实</b>。主妻体或家世有一段不如意处，或聚少离多。</p>
+<p>日支戌，本气戊为偏印。日坐偏印，夫妻不恩爱，彼此不信任，有孤独之境遇——这一条书上断得最直。落到你身上：<b>这一造的夫妻难处不在贫富，在信任。</b>日支坐偏印的人，心事自守，不轻与人言；配偶也有各人的隐衷。两人同住一屋，各怀一段不说的话。外面看得见钱，家里说不出话。</p>
+<p>夫妻之间若以事功相责，愈责愈远；容得下不必全说，反得久长。</p>
+<p>偏财甲透年干而不在妻宫，主早年异性缘不缺，然非婚姻之正。此层只作背景，不另立断。</p>
+<p><b>应期回填</b>：妻宫不是一成不变的静态。己卯运（四十至四十九岁），卯与妻宫戌合——<b>妻宫被合走</b>，这十年夫妻聚散之力最大，是婚变窗口；运内二〇二九己酉，酉戌相害，害正在妻宫，妻体之防也在此年；二〇三〇庚戌，日柱伏吟兼戌戌自刑，妻宫受刑又受动。这几处引动之年，「难处在信任」一句最容易见真章，须预提一分心。</p>
+</div>
+
+<div class="sec">
+<h2><span class="no">四</span>财</h2>
+<p>财星甲乙双透天干。<b>财透则藏不住</b>——露在干上，来求助的人就多：借贷、担保、合伙，都是从这一处进来的。你的钱不是赚不到，是守不住；也不是守不住在生意上，是守不住在人面上。</p>
+<p>正财在月，偏财在年，两财并见。正财是稳定的进项，偏财是走动来的钱。两样都有，主一生不止一种收入，也不止一种职业。</p>
+<p><b>财由食出，不由官出。</b>食神壬在月令，伤官癸透时干，是以言语、技艺、专业换钱的路。你走这条路，比走编制那条路顺。</p>
+<p>偏财在天干为明，在地支为暗。天干有偏财，只是人家认为你有钱；偏财通根到时支，才是一辈子都有钱。你的甲在年干为明，根却通在月支亥——<b>有实底，不作空名；但不在时支，「一辈子都有钱」这句话用不上，须看运。</b></p>
+<p>财之聚散：丙子、丁丑两运调候透干，少年一段顺；戊寅到庚辰，火渐伏，求财忙而得少；辛巳、壬午火到，然辛巳冲提，得中有险。<b>财宜迟不宜早，早得必散，晚得方稳。</b></p>
+</div>
+
+<div class="sec">
+<h2><span class="no">五</span>子</h2>
+<p>男命以官杀为子。正官丁两藏于戌、又藏于未，七杀丙不见，<b>官星藏而不透，子星弱而藏</b>。</p>
+<p>所幸时支未为丁之冠带，时柱主子女，<b>子息之机在晚不在早</b>。</p>
+<p>伤官癸透时干，坐时支未，癸在未为墓——伤官入未库。落实：<b>子女缘不薄，而晚年聚少离多。</b></p>
+<p>伤官在时，子女性情与父相反：父藏而子露，父守而子放。这不是不孝，是两代人所走的路本就不同。晚年不必以在身边为孝的标准。</p>
+</div>
+
+<div class="sec">
+<h2><span class="no">六</span>禄</h2>
+<p>本造财格带伤官，<b>伤官生财</b>，是拿才换钱之局，不是拿位取贵之局。官印俱藏，仕途无分。</p>
+<p><b>宜</b>：商业、技术、口才、中介、代理、流动性之业。偏财主不专一业，伤官主以言语技艺见长，二者相生，最合自营、自由、靠本事不靠编制一路。</p>
+<p><b>不宜</b>：公职、大机构之科层、需长期坐守之职。日主无根者，东南西北五湖四海，未必贫贱——<b>本造之财在动不在静</b>，坐守则财滞，走动则财通。年上偏财主发迹他乡，正是这一句。</p>
+<p><b>学业</b>：少年丙子一运，调候透干，读书正在那一段，是这一生最顺的读书时候。此后火伏，学问要靠自修，不靠学堂。</p>
+</div>
+
+<div class="sec">
+<h2><span class="no">七</span>寿</h2>
+<p>论寿元，有一句话要先讲清楚：<b>八字只能看出是长命还是夭寿，看不出殁在哪一年。</b>要定到年，须与流年合论，四柱单独作不了主。</p>
+<p>本造日主庚金，四支之中，子在死、亥在病、戌在衰，只有未为冠带。金气不厚，是<b>不耐久劳</b>之象，不是夭寿之象。</p>
+<p>庚戌日，<b>忌火旺地支之运及冲刑。</b>八步运里，寅、巳、午三步都是火旺之地，庚辰、癸未又逢冲刑。这一条与「调候要火」正相反——<b>要火的是这个命，忌火的是这个日柱</b>。两者相抵，所以你这一生的火，宜在干上、不宜在支上：丁丙透干的年是暖，寅巳午的运是燥。<b>燥不是暖</b>，这一层分不清，吉凶就反了。</p>
+<p>寿元之关在壬午。庚日入午，十干败亡成立，午又冲年支子。七十岁至七十九岁这一段，宜早作检点：不冒险、不担保、不远行争利。</p>
+<p>具体的年岁我不写。写出来是骗你。</p>
+</div>
+
+<div class="sec">
+<h2><span class="no">八</span>性情</h2>
+<p>偏财为格。偏财格比较快乐，不把钱当钱看；性宽容，输得起赢得起，天性乐观，容易接受奉承，一旦倒帐就不得了。偏财什么都不怕，就怕羊刃，尤在时上——本造时干癸为伤官、非刃，这一层不犯。</p>
+<p>日柱庚戌是魁罡。魁罡性憨，有操持而为人聪敏，权重而害六亲。与偏财合看：<b>你不是不会算计，是不屑于算计；一旦算计起来，又比谁都硬。</b></p>
+<p>伤官透时而无官星明制，才气外露，不耐约束，言语直，易伤人而不自知。</p>
+<p>三样合看：一个慷慨、有才、极不服管的人。长处在此，坎也在此——不服管则难入体制，慷慨则财来财去，权重则六亲受累。</p>
+</div>
+
+<div class="sec">
+<h2><span class="no">九</span>父母兄弟</h2>
+<p><b>父</b>：以甲偏财为父。甲透年干，坐子为沐浴，通根亥为长生，年柱又主祖上父母——<b>父星旺而得地，且居其位</b>。主父体健、有主张，你早年得父荫。</p>
+<p><b>母</b>：以己正印为母。己藏未为本气，戊藏戌为偏印，两见皆藏而皆有根。主母性内敛、务实、不多言，助在本分不在张扬。印不透，故母之助力多在暗处。戌未相刑，两库相激，主母中年有一段操劳。</p>
+<p><b>兄弟</b>：比劫只辛一点，藏于戌，不透。主手足少，或虽有不亲。魁罡权重却害六亲，这一层与手足之少正合。</p>
+<p><b>应期回填（母）</b>：己卯运（四十至四十九岁），亥卯未合成木局，未中己土正印被合化为木——木是财，<b>财多坏印</b>。印是母亲，也是庇护：母体之灾、庇护之失，看这一段。应期看流年引动——二〇二六丙午，午未合动时支（印之根被引）；二〇二九己酉，酉冲卯，冲开合局之年化神受激。这两处当为母灾之期，须先有安排。此两条按规则该这么批，实情仍待验——文末问单有对处。</p>
+</div>
+
+<div class="sec">
+<h2><span class="no">十</span>疾病</h2>
+<p>论疾病有一个分寸：<b>有显明之症兆才批，不必细微注批。</b>本造有三处是显明的，按三条线扫——</p>
+<p><b>一线，日主所主</b>：庚金主肺、大肠、筋骨、皮肤、鼻。本造金气不厚（庚无禄旺，辛只一点），这一线是次薄处——呼吸道、筋骨、皮肤，比常人多一分留意，尤其换季与燥热之年。</p>
+<p><b>二线，用神受克最重之处</b>：丁火是调候用神，两藏戌未而受三水围克（亥月水旺、年支子、时干癸），库又逢辰运冲。<b>用神被克最重之处，主心血、血压、眼目</b>——这一线是本造中高风险，四十岁以后逐年留意，亥子之月尤甚。</p>
+<p><b>三线，忌神当令之处</b>：水当令而火无明字，金寒水冷，<b>主肾疾</b>——肾与膀胱一路，是先天薄处。早睡、保暖、少熬夜，这三件事比吃药实在。</p>
+<p>另有一条：庚辛带三刑，则见龟背。本造原局戌未为三刑之二，不全，<b>此条在原局不成立</b>；丁丑运丑字一到，三刑全备，此条在该运回溯成立——脊背、颈椎之防，正应在二十至二十九那一段。</p>
+<p>以上三线都属先天倾向提示，不是医学诊断；有病就医，命书不作方子。</p>
+</div>
+
+<div class="sec">
+<h2><span class="no">十一</span>大运批导</h2>
+<p>阳年男命，大运顺行。自月柱乙亥起：<b>丙子、丁丑、戊寅、己卯、庚辰、辛巳、壬午、癸未</b>。十岁起运（交运虚岁十，一九九三年二月三日交运），虚岁计。</p>
+<p>批大运有一条改定的次序：<b>固定四问，问问出结论，不许跳过</b>——</p>
+<p>一问<b>调候</b>：补不补丁丙（含支藏）；补的是正官丁还是七杀丙，两样口气。 二问<b>扶抑</b>：运干十神对日主是帮（比劫、印）还是泄耗克（食伤、财、官杀）；运支是日主的什么气地（禄、刃、生、库、绝）。 三问<b>格局</b>：原局用神（财、官、印、食）在此运是被引出、被合走、还是入墓被收。 四问<b>刑冲合会破穿</b>：对宫位与六亲的冲击面。</p>
+<p>裁决的规矩：四问同向，直断；两两相反，写成「得中带失／凶中带财」的复合断，并列出成立条件；<b>不许拿任何一问单独一票否决其余三问。</b>每步运的批语开首，四问各落一行——哪一问没落成文字，这一步就没批完。</p>
+<p>旧稿此处原写「先看补不补调候，再看刑冲」，那句作废：那是单键排序，只挂了两个键，比肩帮身、印星生金这样的事在里头没有位置——庚辰运就栽在这个口上。</p>
+<p>八步运的调候向背如下——</p>
+<p class="flat">调候所列之字为丁、丙。八步大运补与不补，照运干与运支所藏看——所补之字各挂十神，用时分口气：</p><table>
+<tr><th>大运</th><th>补调候否</th><th>所补之字十神</th></tr>
+<tr><td>丙子</td><td class="l">运干丙</td><td class="l">丙（七杀）</td></tr>
+<tr><td>丁丑</td><td class="l">运干丁</td><td class="l">丁（正官）</td></tr>
+<tr><td>戊寅</td><td class="l">支藏丙</td><td class="l">丙（七杀）</td></tr>
+<tr><td>己卯</td><td class="l">不补</td><td class="l">—</td></tr>
+<tr><td>庚辰</td><td class="l">不补</td><td class="l">—</td></tr>
+<tr><td>辛巳</td><td class="l">支藏丙</td><td class="l">丙（七杀）</td></tr>
+<tr><td>壬午</td><td class="l">支藏丁</td><td class="l">丁（正官）</td></tr>
+<tr><td>癸未</td><td class="l">支藏丁</td><td class="l">丁（正官）</td></tr>
+</table>
+<p>空亡一层也须记。戊寅、己卯两步，正落日柱旬空。<b>空亡不作大凶，只作减半——吉也减半，凶也减半。</b>所以这两步的得，不如所见之多。</p>
+<div class="yun"><b>一、丙子（十岁至十九岁）</b>
+<p><b>四问</b>——调候：丙透干，补的是<b>七杀</b>不是正官，暖是暖了、攻身也是它。扶抑：子为伤官之地，泄庚；子与年支伏吟。格局：七杀透而得时干癸伤官遥制，制在而力薄。刑冲：伏吟在年支，旧象重复。</p>
+<p>丙为调候<b>透干</b>，然透的是七杀——<b>暖中带攻</b>。落实：少年聪敏、读书身体尚可（伤官制杀，制得七分），然管束与压力不断——师长之严、家中之紧，都是杀面。伏吟在年，主早年家中环境有重复、迁延之事。此运不作吉凶轻重之论，只记杀透有制一笔。</p>
+</div>
+<div class="yun"><b>二、丁丑（二十岁至二十九岁）</b>
+<p><b>四问</b>——调候：丁透干，<b>正官</b>，是真调候。扶抑：丑为湿土，生金而晦火，帮身与碍暖并见；丑为金之养地。格局：正官透而出，名分之事得力。刑冲：<b>亥子丑北方三会成局</b>（原局已有亥、子，运丑一到即补齐）——食伤成党，大泄日主；<b>丑戌未三刑全备</b>（原局已有戌、未）——刑全；丑未冲时柱；丁癸相克。</p>
+<p>丁为调候<b>透干</b>，是八步里调候最得力的一步——暖与名分俱到。<b>然三件大事同时并起，不是颠簸：</b></p>
+<p>一、<b>亥子丑三会北方</b>——原局亥、子两支作势已久，丑一到即成局。食伤成党，大泄庚金：才气尽出之年段，也是泄得最狠的一段。</p>
+<p>二、<b>丑戌未三刑全备</b>——原局戌未二字本已作势，运丑补齐即成全。刑全主刑伤、病讼、家宅之动，应验期从这一运起算。前文疾病节「庚辛带三刑则见龟背」一条，原局不全不成立，<b>在此运回溯成立</b>——脊背、颈椎之防，正应在这一段。</p>
+<p>三、<b>丑未一冲</b>，冲在时柱；丁癸又相克——调候与伤官交战。</p>
+<p>落实：此十年少年得名、有名声（官透），然家中或自身有一段刑伤、病讼之事，两者并行不悖——<b>得中带伤</b>，不是调候好就把刑冲抹平，也不是刑冲重就掩了调候的得。凡流年再引动丑戌未者，应事更急。</p>
+</div>
+<div class="yun"><b>三、戊寅（三十岁至三十九岁）</b>
+<p><b>四问</b>——调候：寅中藏丙，七杀之暖入支，燥不是暖（前文有言）。扶抑：寅为庚之<b>绝地</b>，日主最无气的一段；戊偏印透干帮身。格局：寅亥合，甲偏财禄在寅——<b>财被引出</b>。刑冲：寅亥六合合住提纲；<b>寅填日柱旬空</b>（庚戌旬空在寅卯），出空填实。</p>
+<p>这一步先讲<b>填实</b>：空亡一节，前文只说了「不作大凶，只作减半」——那是空亡之支在局中落空之说；还有另一半——<b>旬空之位，原局不见，大运流年补到，即「出空填实」，填实则发力</b>。寅卯正是本造日柱旬空之位，原局不见寅卯，戊寅、己卯两步运先后把这两个位填实：寅中甲丙、卯中乙，财禄之根从虚转实。<b>所以三十至四十九这二十年，是财事集中应验之段</b>——「减半」与「填实则发力」两义，在此并置而不相矛盾：局中逢空者减半，运补空位者发力。</p>
+<p>再落四问：寅亥合提、财地、调候入支，吉凶相参——财可得，事易散，宜聚不宜张。又寅为火之长生，正是庚戌日所忌的火旺地支，故此运得中有损：钱进来了，身子也跟着耗。<b>这一步最忌的，是把身体当本钱去换事业。</b></p>
+</div>
+<div class="yun now"><b>四、己卯（四十岁至四十九岁）<span class="tag now">当前所行</span></b>
+<p><b>四问</b>——调候：不补。扶抑：卯为庚之<b>胎</b>，日主无气；局中财星三见（甲、乙，加会局之木），<b>财重而身弱</b>。格局：亥卯未木局成，<b>未中己土正印被合化为木——印化为财，财坏印</b>。刑冲：<b>子卯刑</b>（刑在年支，无礼之刑）；卯戌合（<b>合走妻宫</b>）；卯落旬空。</p>
+<p>定性先说准：这一步<b>不是「一生财气最盛」，是财重身弱、成而复散</b>——财局成是实，自己扛不扛得住也是实。日主在胎地，满局之财是背不动的担子：成局须自己收得住，收不住则成而复散。宜稳守已有之局，不宜再开新盘；卯落旬空，得而减半。</p>
+<p>三件引动，各有应处：</p>
+<p>一、<b>财坏印</b>：印是母亲，也是庇护——母体之灾、庇护之失看这一段。应期：二〇二六丙午（午未合动印之根）、二〇二九己酉（酉冲卯，冲开合局，化神受激）。待验。</p>
+<p>二、<b>合走妻宫</b>：卯戌合，妻宫被合走——婚变窗口在此，妻节已回填。</p>
+<p>三、<b>子卯刑</b>：刑在年支，主长上之间失礼失和，祖上、长辈一路的事有磨。</p>
+<p>己土正印又透运干——印在干上是明处护身，然坐卯被局合化，护身之力被这局木抽走：外头看着有靠，实际靠不大住，凡事还是自己扛。</p>
+</div>
+<div class="yun"><b>五、庚辰（五十岁至五十九岁）</b>
+<p><b>四问</b>——调候：不补，辰为湿土水库。扶抑：<b>庚比肩透干帮身，辰土生金——全盘最缺的帮身之字，在这一步到齐</b>；辰为金之养地。格局：月令壬水食神入辰墓。刑冲：辰戌冲——冲妻宫、冲魁罡。</p>
+<p>这步运<b>两面都真，不取一面</b>：</p>
+<p><b>帮身一面</b>：日主五十年里头一回得力——比肩帮身、湿土生金，财重身弱之局，这一步是转机，扛得住财官了。旧稿把这步只当「第一个坎」，是只看了第四问、没看第二问；四问并置，此面的分量须先摆足。</p>
+<p><b>冲刑一面</b>：辰戌一冲，冲在妻宫、冲在魁罡——妻宫与自身之相都受动，这是实的。<b>然冲有两读</b>：戌是火库，丁正官藏于戌——辰戌一冲，<b>库门被冲开，戌中丁官、戊印俱有出干之势——财官为我所得</b>。五十年藏而不透的官星，反在妻宫受冲之年见了天光。所以这一冲，冲掉的是安稳，冲出来的可能是名分权柄——<b>冲开官库之得</b>与<b>冲妻宫破魁罡之险</b>，两读并置，由流年引动定哪一面成真。至于壬水入墓，「墓库运主凶」这条有个<b>适用条件</b>：所指是<b>日主自身之禄或用神入墓</b>。壬是食神——冬金泄身之病，<b>病神入墓，去病也</b>，不作凶断。凶不凶，不在墓，在冲。</p>
+<p>裁决：<b>得中带冲</b>——身得力、库得开，而妻宫与自身之相受动。凡扩张、迁动、易主之事仍宜缓，守则无大过；官库既开，名分权柄之事若有来头，可接而不可追——来求你的可以应，主动去争的不必。财权之事此运是落定还是困滞，看流年引动，文末问单有对处。</p>
+</div>
+<div class="yun"><b>六、辛巳（六十岁至六十九岁）</b>
+<p><b>四问</b>——调候：辛与丙合（丙被合走）、丁克辛（调候与劫财交战），宽解落空。扶抑：巳为庚之<b>长生</b>，日主得生；辛劫财透干则帮身与夺财同体。格局：<b>辛劫财明克乙正财——财被劫</b>；巳中戊土枭神，暗夺亥中壬水食神——<b>枭夺食之暗线</b>。刑冲：巳亥冲提；天克地冲月柱乙亥；罗网补齐（巳补戌亥天罗之缺）；<b>亡神填实</b>（巳）。</p>
+<p>全篇最须留意的一步。原有三事——<b>冲提</b>（巳冲亥，凡亥月生人俱忌巳运）、<b>天克地冲</b>（正对月柱乙亥，全面性之凶）、<b>罗网补齐</b>——之外，四问再补两件实的：</p>
+<p>四、<b>劫财克财</b>：辛明克乙，乙是妻星又是正财——<b>破财与妻灾一路</b>：六十之后不做保、不放贷、不大额借出，妻体之防也在这十年。</p>
+<p>五、<b>枭夺食</b>：巳中戊土暗合亥中壬水——枭神夺食是暗线，应事在生计来源被截、口福口舌、饮食人口之灾。明枪是冲提，暗箭是夺食，两头都要防。</p>
+<p>冲提之运本有宽解（流年不逢六项会集、天干不克不合调候俱论安祥），这一步用不上——辛与丙合、丁又克辛，调候一个被合、一个受战。又巳为火旺之地，正是庚戌日所忌。所幸巳为庚之长生，日主得生，不至倾覆。落实：此十年以<b>身体、亲长、居所</b>三事为主，不以财官为主。凡此十年中再逢冲刑之流年，须格外留意。</p>
+</div>
+<div class="yun"><b>七、壬午（七十岁至七十九岁）</b>
+<p><b>四问</b>——调候：午中藏丁，调候反得地。扶抑：午为庚之<b>败地</b>，<b>十干败亡成立</b>——此法适用条件先写明：所指是<b>日主自身</b>入败地，成立前提为日主四柱地支不带临官、帝旺；本造四支无申无酉，前提具足，故成立，成立后不再问格局成败。格局：败亡既立，格局让位。刑冲：午冲年支子、合时支未。</p>
+<p>结构上是本造最凶的一步，调候上却是火到之时。二说并置，不强行合一。此运宜格外谨慎：<b>不冒险、不担保、不远行争利。</b></p>
+</div>
+<div class="yun"><b>八、癸未（八十岁至八十九岁）</b>
+<p><b>四问</b>——调候：未中藏丁，调候尚在。扶抑：癸伤官再透，泄而无力再生。格局：伤官伏吟于时。刑冲：癸未与时柱伏吟；未与日支戌再刑。</p>
+<p>伏吟主旧事重来、事倍功半。老境宜静，多回顾、多收束，不宜开新局。六七十岁以后，非别有特色之八字不作详批，故此运只出纲目。</p>
+</div>
+<h3>全流冲刑会合</h3>
+<p>批大运除调候、败亡二法之外，另有全流冲刑会合一项，在批流月之中占极重之影响力。下表只列结构触发，不列吉凶——因吉凶须并看当时流年干与调候之向背。</p>
+<details><summary>全流冲刑会合　共73行　点开细看</summary><table>
+<tr><th>大运</th><th>流年支</th><th>撞出的结构</th></tr>
+<tr><td>丙子</td><td>丑</td><td class="l">运支与流年六合；丑年六合；丑日刑；丑时冲；丑时刑；运子年丑与柱亥凑成三会全</td></tr>
+<tr><td>丙子</td><td>卯</td><td class="l">运支与流年刑；卯年刑；卯日六合</td></tr>
+<tr><td>丙子</td><td>辰</td><td class="l">辰日冲</td></tr>
+<tr><td>丙子</td><td>巳</td><td class="l">巳月冲</td></tr>
+<tr><td>丙子</td><td>午</td><td class="l">运支与流年冲；午年冲；午时六合</td></tr>
+<tr><td>丙子</td><td>未</td><td class="l">运支与流年害；未年害；未日刑</td></tr>
+<tr><td>丙子</td><td>戌</td><td class="l">戌时刑</td></tr>
+<tr><td>丙子</td><td>亥</td><td class="l">亥月自刑</td></tr>
+<tr><td>丁丑</td><td>子</td><td class="l">运支与流年六合；子时害；运丑年子与柱亥凑成三会全</td></tr>
+<tr><td>丁丑</td><td>丑</td><td class="l">丑年六合；丑日刑；丑时冲；丑时刑</td></tr>
+<tr><td>丁丑</td><td>卯</td><td class="l">卯年刑；卯日六合</td></tr>
+<tr><td>丁丑</td><td>辰</td><td class="l">辰日冲</td></tr>
+<tr><td>丁丑</td><td>巳</td><td class="l">巳月冲</td></tr>
+<tr><td>丁丑</td><td>午</td><td class="l">运支与流年害；午年冲；午时六合</td></tr>
+<tr><td>丁丑</td><td>未</td><td class="l">运支与流年冲；运支与流年刑；未年害；未日刑</td></tr>
+<tr><td>丁丑</td><td>戌</td><td class="l">运支与流年刑；戌时刑</td></tr>
+<tr><td>丁丑</td><td>亥</td><td class="l">亥月自刑；运丑年亥与柱子凑成三会全</td></tr>
+<tr><td>戊寅</td><td>丑</td><td class="l">丑年六合；丑日刑；丑时冲；丑时刑</td></tr>
+<tr><td>戊寅</td><td>卯</td><td class="l">卯年刑；卯日六合</td></tr>
+<tr><td>戊寅</td><td>辰</td><td class="l">辰日冲</td></tr>
+<tr><td>戊寅</td><td>巳</td><td class="l">运支与流年害；运支与流年刑；巳月冲</td></tr>
+<tr><td>戊寅</td><td>午</td><td class="l">午年冲；午时六合；运寅年午与柱戌凑成三合全</td></tr>
+<tr><td>戊寅</td><td>未</td><td class="l">未年害；未日刑</td></tr>
+<tr><td>戊寅</td><td>申</td><td class="l">运支与流年冲；运支与流年刑；申月害</td></tr>
+<tr><td>戊寅</td><td>戌</td><td class="l">戌时刑</td></tr>
+<tr><td>戊寅</td><td>亥</td><td class="l">运支与流年六合；亥月自刑</td></tr>
+<tr><td>己卯</td><td>子</td><td class="l">运支与流年刑；子时害</td></tr>
+<tr><td>己卯</td><td>丑</td><td class="l">丑年六合；丑日刑；丑时冲；丑时刑</td></tr>
+<tr><td>己卯</td><td>卯</td><td class="l">卯年刑；卯日六合</td></tr>
+<tr><td>己卯</td><td>辰</td><td class="l">运支与流年害；辰日冲</td></tr>
+<tr><td>己卯</td><td>巳</td><td class="l">巳月冲</td></tr>
+<tr><td>己卯</td><td>午</td><td class="l">午年冲；午时六合</td></tr>
+<tr><td>己卯</td><td>未</td><td class="l">未年害；未日刑；运卯年未与柱亥凑成三合全</td></tr>
+<tr><td>己卯</td><td>酉</td><td class="l">运支与流年冲；酉日害</td></tr>
+<tr><td>己卯</td><td>戌</td><td class="l">运支与流年六合；戌时刑</td></tr>
+<tr><td>己卯</td><td>亥</td><td class="l">亥月自刑；运卯年亥与柱未凑成三合全</td></tr>
+<tr><td>庚辰</td><td>丑</td><td class="l">丑年六合；丑日刑；丑时冲；丑时刑</td></tr>
+<tr><td>庚辰</td><td>卯</td><td class="l">运支与流年害；卯年刑；卯日六合</td></tr>
+<tr><td>庚辰</td><td>辰</td><td class="l">运支与流年自刑；辰日冲</td></tr>
+<tr><td>庚辰</td><td>巳</td><td class="l">巳月冲</td></tr>
+<tr><td>庚辰</td><td>午</td><td class="l">午年冲；午时六合</td></tr>
+<tr><td>庚辰</td><td>未</td><td class="l">未年害；未日刑</td></tr>
+<tr><td>庚辰</td><td>申</td><td class="l">申月害；运辰年申与柱子凑成三合全</td></tr>
+<tr><td>庚辰</td><td>戌</td><td class="l">运支与流年冲；戌时刑</td></tr>
+<tr><td>庚辰</td><td>亥</td><td class="l">亥月自刑</td></tr>
+<tr><td>辛巳</td><td>丑</td><td class="l">丑年六合；丑日刑；丑时冲；丑时刑</td></tr>
+<tr><td>辛巳</td><td>寅</td><td class="l">运支与流年害；运支与流年刑；寅月六合</td></tr>
+<tr><td>辛巳</td><td>卯</td><td class="l">卯年刑；卯日六合</td></tr>
+<tr><td>辛巳</td><td>辰</td><td class="l">辰日冲</td></tr>
+<tr><td>辛巳</td><td>巳</td><td class="l">巳月冲</td></tr>
+<tr><td>辛巳</td><td>午</td><td class="l">午年冲；午时六合；运巳年午与柱未凑成三会全</td></tr>
+<tr><td>辛巳</td><td>未</td><td class="l">未年害；未日刑</td></tr>
+<tr><td>辛巳</td><td>申</td><td class="l">运支与流年六合；运支与流年刑；申月害</td></tr>
+<tr><td>辛巳</td><td>戌</td><td class="l">戌时刑</td></tr>
+<tr><td>辛巳</td><td>亥</td><td class="l">运支与流年冲；亥月自刑</td></tr>
+<tr><td>壬午</td><td>子</td><td class="l">运支与流年冲；子时害</td></tr>
+<tr><td>壬午</td><td>丑</td><td class="l">运支与流年害；丑年六合；丑日刑；丑时冲；丑时刑</td></tr>
+<tr><td>壬午</td><td>寅</td><td class="l">寅月六合；运午年寅与柱戌凑成三合全</td></tr>
+<tr><td>壬午</td><td>卯</td><td class="l">卯年刑；卯日六合</td></tr>
+<tr><td>壬午</td><td>辰</td><td class="l">辰日冲</td></tr>
+<tr><td>壬午</td><td>巳</td><td class="l">巳月冲；运午年巳与柱未凑成三会全</td></tr>
+<tr><td>壬午</td><td>午</td><td class="l">运支与流年自刑；午年冲；午时六合</td></tr>
+<tr><td>壬午</td><td>未</td><td class="l">运支与流年六合；未年害；未日刑</td></tr>
+<tr><td>壬午</td><td>戌</td><td class="l">戌时刑</td></tr>
+<tr><td>壬午</td><td>亥</td><td class="l">亥月自刑</td></tr>
+<tr><td>癸未</td><td>丑</td><td class="l">运支与流年冲；运支与流年刑；丑年六合；丑日刑；丑时冲；丑时刑</td></tr>
+<tr><td>癸未</td><td>卯</td><td class="l">卯年刑；卯日六合；运未年卯与柱亥凑成三合全</td></tr>
+<tr><td>癸未</td><td>辰</td><td class="l">辰日冲</td></tr>
+<tr><td>癸未</td><td>巳</td><td class="l">巳月冲</td></tr>
+<tr><td>癸未</td><td>午</td><td class="l">运支与流年六合；午年冲；午时六合</td></tr>
+<tr><td>癸未</td><td>未</td><td class="l">未年害；未日刑</td></tr>
+<tr><td>癸未</td><td>戌</td><td class="l">运支与流年刑；戌时刑</td></tr>
+<tr><td>癸未</td><td>亥</td><td class="l">亥月自刑</td></tr>
+</table></details>
+</div>
+
+<div class="sec">
+<h2><span class="no">十二</span>流年举要</h2>
+<table>
+<tr><th>年</th><th>干支</th><th>虚岁</th><th>所行大运</th><th>结构</th></tr>
+<tr><td>2026</td><td>丙午</td><td>43</td><td>己卯</td><td class="l">无大事触发</td></tr>
+<tr><td>2027</td><td>丁未</td><td>44</td><td>己卯</td><td class="l">入四墓·辰戌丑未架势</td></tr>
+<tr><td>2028</td><td>戊申</td><td>45</td><td>己卯</td><td class="l">无大事触发</td></tr>
+<tr><td>2029</td><td>己酉</td><td>46</td><td>己卯</td><td class="l">冲大运（新起之事）</td></tr>
+<tr><td>2030</td><td>庚戌</td><td>47</td><td>己卯</td><td class="l">入天罗地网·戌亥辰巳／四墓·辰戌丑未架势</td></tr>
+<tr><td>2031</td><td>辛亥</td><td>48</td><td>己卯</td><td class="l">入天罗地网·戌亥辰巳架势</td></tr>
+</table>
+<p>二〇二六丙午：丙为<b>七杀</b>透干——杀攻身之年，不是「调候到位」四个字能盖住的。午冲年支子：子是癸水之禄，伤官驾杀的根被这一冲拔了——<b>杀无制而攻身</b>；午又合时支未、填将星（午为将星）。落实：官非口舌、与上级之冲突、破财、换赛道之类，须防——七杀攻身而驾杀之力受冲，<b>不作「宜进取」断</b>；宜守、宜了结旧事、宜避讼。将星填于杀年，权柄之争当防。此年在己卯运中，财重身弱，更不宜动。</p>
+<p>二〇二七丁未：丁是<b>正官</b>透——真调候，与二〇二六的丙七杀两样口气：官主名分，名分之事可成。未与时支伏吟、与日支相刑（戌未刑再引）——调候得而家宅之扰起，得中有扰，宜守成。</p>
+<p>二〇二八戊申：<b>戊与时干癸明合</b>——偏印合伤官，才气被合绊：言语、文章、签约之事受抑，或被长辈、实务绊住身。申为庚之<b>禄</b>，又为<b>驿马</b>填禄——迁动中得禄，奔波中定事，<b>身、禄俱到</b>，为近数年中较实之一年，宜定大计。唯申与月支亥相害，动中得。</p>
+<p>二〇二九己酉：酉为庚之帝旺——<b>帝旺即是羊刃</b>（前文神煞已查：羊刃在酉），这一层不能拿「帝旺身强」一个词躲过去。<b>刃旺之年，得财与破耗并见</b>：身强任财是得，刃动劫财是耗——大进大出之年，不宜贪；刃又主伤灾，金属、利器、车马之伤格外留意。酉与日支戌相害——害在妻宫，妻体之防；与运支卯相冲——<b>冲开财局</b>。三面并断：身强得财、刃动破耗、害动妻宫。</p>
+<p>二〇三〇庚戌：<b>日柱伏吟</b>——庚戌再逢庚戌，旧事重来，自身之相受动；<b>戌戌自刑</b>，刑在妻宫与魁罡——自扰自缠，多半是自己跟自己过不去；庚比肩透干，劫财一面再现——兄弟朋友之财事，此年不可沾。表里「入天罗地网」一签，凑齐条件是戌亥辰巳四字见全：本造原局已有戌亥，此年戌自坐，仍欠辰巳——<b>欠而不全，此签降一等看，不作大断</b>（天罗地网另有一路轻重之说，我手里无原文可凭，不代裁）。</p>
+<p>二〇三一辛亥：<b>亥亥自刑</b>——刑在月支提纲，提纲受刑，根基之事有摇；辛劫财透干，克乙正财——与二〇三〇同一劫财之面，财事连着两年受劫，六十前这两年是财上最须收手的时候；亥又是劫煞填实——落点在月柱，按附言的规矩，不另加一层吉凶，与劫财并看。</p>
+<p>以上只作结构提示。逐年细批须另立流年书，本命书为大批，无流月。</p>
+</div>
+
+<div class="sec">
+<h2><span class="no">十三</span>人生指要</h2>
+<p>这一节不是新批。断语的分寸都在前头各节，这里只做一件事：把已经说过的话，归拢成一份能照着做的单子。</p>
+<p><b>你如今在哪</b>：二〇二六年丙午，虚岁四十三，行第四步己卯运——四十至四十九岁这十年，财重身弱，成而复散；且妻宫被合走、母缘受损之应都在这十年里。五十岁入庚辰，帮身得力而宫位受动，守则无大过；六十岁入辛巳，是这一生唯一要预先布置的十年。<b>五十岁前布局，五十岁后守成</b>——眼下这几年怎么用，比往后任何一年都值钱。</p>
+<p><b>一句总纲</b>：寒金待火，财等运来。你这一生的成就不在「能不能」，在「迟速」；要火不要燥，要动不要守，要本事不要位子——同是火，丁年可进、丙年须防，官与杀两样口气。</p>
+<p><b>事业</b>：拿言语、技艺、专业换钱的路最顺——商业、技术、中介、代理、流动性之业。公职、科层、久坐之职早放手，仕途上无分，这一条早认，省得白耗年月。</p>
+<p><b>财</b>：三十至四十九是财事集中应验之段（旬空填实，财禄之根从虚转实），然己卯十年财重身弱，成而复散——<b>财是有的，担子看你扛不扛得动</b>；宜稳守，不宜再开新盘。借贷、担保、合伙，三样慎之又慎；五十后比肩劫财连着来，更要收手。</p>
+<p><b>婚姻</b>：这一造的夫妻难处不在贫富，在信任。容得下不必全说，反得久长；以事功相责，愈责愈远。应期提点：二〇二九、二〇三〇妻宫连着受害受刑，那两年多陪多让，妻体之防也在彼时。</p>
+<p><b>父母</b>：二〇二六、二〇二九两年是母缘受损之应（财坏印），先有安排，多看一眼。</p>
+<p><b>健康</b>：三条线——肺、大肠、筋骨、皮肤（日主一线）；<b>心血、血压、眼目</b>（用神受克一线，中高风险，四十后逐年留意）；肾与膀胱（水寒一线）——早睡、保暖、少熬夜，三件事比吃药实在。脊背颈椎，二十至二十九那段的旧账（三刑既全），坐姿留心。</p>
+<p><b>时机</b>：二〇二六丙午七杀攻身，宜守、宜了结、宜避讼，<b>不宜进取</b>；二〇二七丁未正官透，名分之事可成；二〇二八戊申身禄俱到，宜定大计；二〇二九羊刃得财与破耗并见，不宜贪；二〇三〇、二〇三一劫财连来，财上收手。寅巳午在地支上的运是燥不是暖，忌在那样的运里燥进。</p>
+<p><b>宜</b>：</p>
+<ul class="plain">
+<li>走动求财——财在动不在静，坐守则财滞，走动则财通。</li>
+<li>拿本事换钱——伤官生财，专业立身，比走编制顺。</li>
+<li>家事容让——不必全说，反而久长。</li>
+<li>丁年进取——正官透之年，名分之事可成，该了结的了结，该布局的布局。</li>
+<li>三十至四十九聚财——旬空填实，财禄之根在此；然成局须自己收得住。</li>
+</ul>
+<p><b>忌</b>：</p>
+<ul class="plain">
+<li>忌把身体当本钱去换事业——三十至三十九那一步最忌这个，往后也照用。</li>
+<li>忌借贷、担保、合伙——财透干，这一处进来的都是这类事。</li>
+<li>忌在编制与久坐之职上耗年月。</li>
+<li>忌丙年燥进——七杀攻身，官非口舌之防；同为火，丙丁两样口气。</li>
+<li>忌刃年大进大出——二〇二九之类，得财与破耗并见，又防伤灾。</li>
+<li>忌五十岁后扩张、迁动、易主——比肩帮身是转机，辰戌冲妻宫破魁罡是险，动则两伤。</li>
+<li>忌六十岁后做保、放贷、大额借出——劫财克财，破财与妻灾一路。</li>
+<li>忌七十岁后冒险、担保——壬午十年，不冒险、不担保、不远行争利。</li>
+<li>忌熬夜与劳心过度——心血、血压、眼目一线是中高风险，肾水一线是先天薄处。</li>
+<li>忌在亲缘上事事作主——魁罡权重而害六亲，家里少断是非，多留余地。</li>
+</ul>
+<p><b>日用小节</b>：命中喜火，衣着家居可用红、紫、橙暖色作点缀，忌大面积黑与深蓝；座位朝南，多见日光，久居之地宜明亮干燥。这一条是喜火的日用延伸，小节而已，不作命理断语。</p>
+</div>
+
+<div class="sec">
+<h2><span class="no">十四</span>待验问事</h2>
+<p>有一处要老实交代：这本命书全篇无一句你的反馈，验盘四法里的流年回溯、大运匹配两条没法执行。所以下面这些断语，只能算「按规则该这么批」，不能算「已经验过」。请你按年对实事，对完回来，照复核的规矩再校一遍——<b>原断一字不动，只标符与偏</b>。</p>
+<p>一、二十至二十九（丁丑运）：家中或自身，有无一段刑伤、病讼、家宅之动？亥子丑会局、丑戌未三刑都在那十年应事。</p>
+<p>二、三十至三十九（戊寅运）：事业与婚姻是否在那十年定盘？身体有无一段明显之耗？</p>
+<p>三、二〇二六丙午：有无官非口舌、与上级之冲突、破财？——这一条当年就验，最要紧。</p>
+<p>四、二〇二九己酉：得财之外，有无破耗、伤灾？妻体有无恙？</p>
+<p>五、二〇二六、二〇二九两年：母亲身体有无一段明显之灾病？——财坏印之应。</p>
+<p>六、己卯运这十年：夫妻有无一段聚散？子女是否反于父性（父藏子露）？</p>
+<p>七、五十岁之后（庚辰运）：财权是落定还是困滞？——这一条要到年再验，先记着。</p>
+<p>以上各条皆标「待验」。验后符者留，偏者记个案——规矩是反馈不改断语，个案不上通则。</p>
+</div>
+
+<div class="sec">
+<h2><span class="no">附</span>附言</h2>
+<p><b>神煞这一层，如今有表可查，我把查得的都摆给你。</b></p>
+<p>年支子查：孤辰在寅，寡宿在戌，大耗在未。月支亥查：天德是乙，月德是甲。日干庚查：天乙贵人在未丑，文昌在亥，羊刃在酉，干禄在申，红艳在戌。日支戌查：将星在午，华盖在戌，驿马在申，劫煞在亥，亡神在巳，桃花在卯。</p>
+<p>对着四柱数：<b>见的是九个</b>——寡宿、大耗、天德、月德、天乙、文昌、红艳、华盖、劫煞。<b>不见的是七个</b>——孤辰、羊刃、干禄、将星、驿马、亡神、桃花。</p>
+<p>这些字眼，有听着吓人的（劫煞、大耗、寡宿），也有听着好听的（天德、月德、天乙、文昌）。<b>都不作准。</b><b>神煞本身不论吉凶</b>，要看它落在哪一柱、与日主是生是克：</p>
+<ul class="plain">
+<li>天德在月干乙、月德在年干甲，都是庚金之财；天乙落在时支未，未中己土生庚，是印；文昌落在月支亥，亥中壬水泄庚，是食神。<b>这四个落点都不伤日主。</b></li>
+<li>红艳、寡宿、华盖三字同落日支戌。戌是夫妻宫。寡宿、华盖两个同宫，断语只有一句：「并没太大吉凶之影响，只是主家庭、夫妻之不和谐。」<b>不作灾断</b>——与妻一节「日坐偏印，夫妻不恩爱，彼此不信任」说的是同一件事，一处说宫位，一处说神煞。</li>
+<li>大耗落时支未，劫煞落月支亥。这两个字旧说有「主耗」「主灾」之目；但按上面那条断法，它们只是给所在的柱加个名字——未是时柱、亥是月柱，这两柱的十神与刑冲在前面各节已经算过，此处不另加一层吉凶。</li>
+</ul>
+<p>另有一路说法，把「劫煞主灾」「天乙主贵」一句断死。<b>这一层我不替你断死</b>：同一个字，落在生我的支上与落在克我的支上，是两回事；上面把落点与生克都给全了，怎么用，你比我清楚。</p>
+<p><b>查了原局，还要往岁运上对一遍</b>——凡岁运填实之煞，点名并说明用与不用：</p>
+<ul class="plain">
+<li>己卯运，卯填<b>桃花</b>——桃花与妻宫戌合，男女之事与夫妻聚散并看，不作另断。</li>
+<li>二〇二六丙午，午填<b>将星</b>——权柄之争，与七杀攻身并看，已在流年批过。</li>
+<li>二〇二八戊申，申填<b>驿马兼干禄</b>——迁动中得禄，已在流年批过。</li>
+<li>二〇二九己酉，酉填<b>羊刃</b>——得财与破耗并断，已在流年批过。</li>
+<li>辛巳运，巳填<b>亡神</b>——落在冲提之运，落点生克前文已给，不另加一层。</li>
+</ul>
+<p>不见之煞（孤辰、干禄、将星、驿马、亡神、桃花原局），原局不见、岁运未见填实者，仍不作准。</p>
+<p><b>流年细到月</b>，我没有材料。上面流年一段只到结构，不到应事。</p>
+<p>还有一句老话：批命这件事，不论简批细批，<b>切忌以包准自居。</b>能有个七成应验，就算合理合宜了。所批各条，验与不验，仍要拿你的实事来对。</p>
+</div>
+
+<footer>命　书　终</footer>
+
+<div style="text-align:center; font-size:12px; color:var(--ink2); letter-spacing:.15em; margin-top:14px;">二〇二六年十一月批写</div>
+
+<div class="promo"><img src="data:image/jpeg;base64,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4R+z+0Z37O/pnj9MVqUAAAAdBRSGFFFFADIpPNiD4xn3p9V7P/jzj/H+dWKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKjml8mJnxnHbOKkqvef8AHo/4fzFAFiiiigAooooAr2f/AB5p+P8AM1YqvZ/8eafj/M1YoAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAqvef8ej/h/MVYqvef8AHo/4fzFAFiiiigAooooAr2f/AB5p+P8AM1YqvZ/8eafj/M1YoAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAqvef8ej/h/MVYqvef8AHo/4fzFAFiiiigAooooAr2f/AB5p+P8AM1YqvZ/8eafj/M1YoAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAqvef8ej/h/MVYqvef8AHo/4fzFAFiiiigAooooAr2f/AB5p+P8AM1YqvZ/8eafj/M1YoAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAqvef8ej/h/MVYqvef8AHo/4fzFAFiiiigAooooAr2f/AB5p+P8AM1YqvZ/8eafj/M1YoAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAqvef8ej/h/MVYqvef8AHo/4fzFAFiiiigAooooAr2f/AB5p+P8AM1YqvZ/8eafj/M1YoAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiivm74G+DPi14d+Jeu3vxG1aa60iaF1CyXvnJLKXBV41z8gxu7DrjFAH0jRRRQB4x4a/aK8NeJ/jBdeBrOzvY7qKaWCK8fb5UskedwAByBwcHvivZ6/OTQgfD/7cYjf5QPE0q/hI7Y6f7wr9G6ACvFvGn7RnhrwT8UrPwdqNley3ErRLPdxbfLtzIRtzk5PUE17TXwn8RPhl4s1/9sOO4XQ72XS7nUrab7atuxhEK7NxZ8YyAp4oA+7KKKKACivhX9pz4o+J4vjhb6D4R1vUbOPS4okWGynaMSXDnJyF+8eVGDnp719yWizLY263bK1wI1ErIMAtjkj2zQBNRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFF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8P5irFV7z/j0f8P5igCxRRRQAUUUUAV7P/jzT8f5mrFV7P8A480/H+ZqxQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAVw+r/AAu8P6740vvEOp/bJbq+0ttKngE+yJoCcn7oDA++6u4ooAyvDvh3TfCvhyy0XQ7dbbT7KMRxRjn6knuScknuTWN4p+HXh7xlr2h6n4gtXuZtFkaS3iaQ+UxP99OjcgH8OcjiuuooAayqyFGUFCMFSOCPSuc8JeB9A8D29/D4Z09LOO/uWuZlU5yx7D0UdABwK6WigDktb8BaVr3jrw94ovZLsajoAkFqkbgRneMHcMEn8CKh8SfDjRPFXjLQvEOrieS70Td9nhBUxPu671KnP5iuzooAyv8AhGtE/wCgPp3/AICp/hXL+OPhJ4W8e6DFpeqWn2OGK4WcSackcMhIVlwW2nj5jx7Cu9ooAKiuLWC6QJdQxTIp3BZEDAH15qWigBkUUcMYSFFRBwFUYAp9FFABRRRQAUUUUAfPv7V2hatr/wAN9Ft9C0u+1G4j1RXeKyt3mZV8qQbiFBIGSBn3r3TSkdNHsUkVlZbdAykYwdo4q9RQAUUUUAFFFFABSHrS0h60ALRRRQAUUUUAFFFFACUtFFABRRRQAUUUUAFH0oooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKr3n/Ho/wCH8xViq95/x6P+H8xQBYooooAKKKKAK9n/AMeafj/M1YqvZ/8AHmn4/wAzVigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACq95/x6P8Ah/MVYqvef8ej/h/MUAWKKKKACiiigCvZ/wDHmn4/zNWKr2f/AB5p+P8AM1YoAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAqvef8ej/AIfzFWKr3n/Ho/4fzFAFiiiigAooooAr2f8Ax5p+P8zViq9n/wAeafj/ADNWKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKr3n/Ho/wCH8xViq95/x6P+H8xQBYooooAKKKKAK9n/AMeafj/M1YqvZ/8AHmn4/wA6sUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAVXvP8Aj0f8P5irFV7z/j0f8P5igCxRRRQBxsXxAtGH760mQ/7JB/wq/B4y0ibG6Z4j/txn+ma8tor4SnxDjI72fqv8rHtPAUulz12x1rTXtUAvbcHnguB39604p4ZhmKRHH+y2a8PpysyHKkg+oOK7IcTVF8dNP0dv8zJ5cukj3OivF49Vv4ceVe3C4/6aGr0HivWIMAXhcf7aKf6ZrrhxNh38UGvSz/yMnl81s0etUV5pH451Ncb47aT3Kkf1q9D8QHH+vsVb/clx/SuqGf4KW8mvVP8AS5k8FWXQ72iuPj8e2TAeZbTofbBq7F4z0iT70zx/76H+ma645pg5bVF+X5mTw1VfZZ0dFZUfiHSpeUvoOf7zY/nVyK/tJjiG4hc/7Lg10xxFGfwyT9GZyhKO6LNFA6UVsSFFGaM0AFFFFABR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2I35ulvl5dhewglt5li0vJ7C7S4tZGSVD1B6+x9RUuqagdT1Brpoo4mYAEIOp7k1Sorn9tNU3Tv7t728y+SN+a2pPaTi2vrecruEUiuVHfBzit648aao9y7W8ixRE/KhRWIH1xXNUVpRxlehFxpSaT10JlShN3krly41Ge71NL262ySqVJyoAOOxxW2PGEsO42en2kEhGN6rXMUVVLG16TbhLV7vr94SoU57rYsW80a6gs93F58ZfdImSN2fcVt/8JStsf8AiUaba2n+1jc358VzlFKli61FNU3a/Wyv9+/4jlSjN+8Xn1fUJLo3DXk4lP8AEHI/T+lakfiqWVBHq1pb38Y7yKFb88f0rnaKKeNxFO9pvXe+q+56A8PTkrNF77TajV/PFoDaB8+RuP3fTPrWo3ijyAw0nT7axJ/iCh2/Miudoop4urTvyO13fZfg918hSowla/QtNqF49y07XU3nHq+85rWh8U3DIseqW8N9EvaVQGH0IFc/RSp4uvSbcZPXfrf1vuN0YNWaLF28Mt5I9rF5MLMdse7O0fWtK98Sajd3PmRzyW6hQoSJyBxWLRUxxFWHNyStfV20B0oO11exLHIEuEkdRIFYMyt/Fz0NdHH4ot7Yl7HRrWCfHyyZzj9BXL0VVDF1cPf2bt8l/loE6UZ/Ehzu0kjO5yzEkn1NNoorBtt3ZaVgooopDCiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigD/2VX79AkAAAAAn/h3A6r4+MwBF7Vkf78iBw==" alt="赞赏二维码（微信：cpms1988）"><p>本命书基于梁湘润先生命理体系批写。若这次解读对你有帮助，可自愿扫码支持命理技能分享。</p><p>另欢迎<b>免费体验盘叔历时半年、以数千现代真人命例打造的苍盘命书</b>——融合各派，与本篇对照参考。</p><p>微信：cpms1988　·　<a class="lnk" href="https://mp.weixin.qq.com/s/9NFaItizyhEpjDzmTyEcPQ">苍盘命书体验邀请</a></p><p class="disc">以上为独立推广内容，不是命理判断或命盘资料。</p></div>
+
+</div>
+</body>
+</html>

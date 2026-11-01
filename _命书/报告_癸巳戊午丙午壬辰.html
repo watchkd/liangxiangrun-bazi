@@ -1,0 +1,777 @@
+<!DOCTYPE html>
+<html lang="zh-Hans">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>分析报告　　　　</title>
+<style>/* 分析报告（交付件 B）样式表
+ *
+ * 与命书（交付件 A）同一套纸墨系统，但用途不同，故有三处刻意分道：
+ *   1. 命书是断语体，字号大、行距松、无标记；报告是分析件，字号小、表格密、逐条挂证。
+ *   2. 报告必须有可见的证据标记（.ev），命书必须一个都没有。
+ *   3. 报告正文宽 900px（表格多），命书 820px。
+ *
+ * 用法：<link rel="stylesheet" href="report.css"> 或由 report_gen.py 内联。
+ * 打印：A4，页边 18mm，表格不跨页断行。
+ */
+
+:root{
+  --paper:#fbf9f3;
+  --ink:#1b1a17;
+  --ink2:#4a463f;
+  --ink3:#7a7365;
+  --red:#8c1c13;
+  --line:#c9c1ae;
+  --soft:#efe9db;
+  --blue:#2c4a63;      /* 证据链接色，与朱红区分：红是断语，蓝是出处 */
+  --warnbg:#f6e9d8;
+}
+
+*{box-sizing:border-box;}
+
+body{
+  margin:0; padding:0 0 60px;
+  background:#e8e4da;
+  font-family:"Songti SC","SimSun","Source Han Serif SC","Noto Serif CJK SC",serif;
+  color:var(--ink); line-height:1.85; font-size:15px;
+}
+
+.sheet{
+  max-width:900px; margin:28px auto; background:var(--paper);
+  padding:60px 68px 76px; box-shadow:0 2px 24px rgba(0,0,0,.14);
+  border-top:6px solid var(--blue);
+}
+
+/* ── 抬头 ── */
+header{text-align:center; margin-bottom:6px;}
+.kicker{font-size:12.5px; letter-spacing:.5em; color:var(--blue); margin-bottom:16px;}
+h1{font-size:34px; letter-spacing:.16em; margin:0 0 8px; font-weight:600;}
+.sub{font-size:13px; color:var(--ink2); letter-spacing:.16em;}
+.meta{text-align:center; font-size:12.5px; color:var(--ink2); margin:10px 0 30px;}
+.meta code{font-size:12px;}
+
+/* ── 章节：报告用 ① 编号，不用汉字序 ── */
+h2{
+  font-size:18px; letter-spacing:.1em; margin:44px 0 16px; padding-bottom:8px;
+  border-bottom:1px solid var(--line); font-weight:600;
+}
+h2 .no{
+  display:inline-block; min-width:1.8em; color:var(--blue);
+  font-size:15px; letter-spacing:0; margin-right:.4em;
+}
+h3{font-size:15px; margin:24px 0 8px; letter-spacing:.06em; color:var(--red); font-weight:600;}
+
+p{margin:0 0 12px; text-align:justify; text-indent:2em;}
+p.flat{text-indent:0;}
+.note{font-size:12.5px; color:var(--ink2); text-indent:0;}
+
+/* ── 表 ── */
+table{width:100%; border-collapse:collapse; margin:14px 0 20px;
+  font-size:13px; line-height:1.65;}
+th,td{border:1px solid var(--line); padding:7px 9px; text-align:center; vertical-align:top;}
+th{background:var(--soft); font-weight:600; letter-spacing:.04em;
+   white-space:nowrap; min-width:2.8em;}
+td.l{text-align:left;}
+td.nw{white-space:nowrap; text-align:center;}
+tbody tr:nth-child(even) td{background:#fdfcf8;}
+
+/* 四柱盘：报告里也保留，供逐柱对读 */
+table.pan{font-size:15px; letter-spacing:.06em;}
+table.pan td{min-width:4.2em;}
+
+/* ── 证据标记：报告的灵魂 ──
+ * .ev 用于行内 rule_id／cell_id；.ev-src 用于出处定位；
+ * 命书里出现任何一个都算不合格（report_check M01）。 */
+.ev{
+  font-family:"SF Mono","Consolas","Menlo",monospace;
+  font-size:11.5px; color:var(--blue); background:#eef1f4;
+  padding:.05em .35em; border-radius:2px; letter-spacing:0;
+  white-space:nowrap;
+}
+.ev-src{font-size:11.5px; color:var(--ink3); letter-spacing:0;}
+.grade{
+  font-size:11px; color:#fff; background:var(--blue);
+  padding:.05em .3em; border-radius:2px; letter-spacing:0;
+}
+.grade.e5{background:#8a7a5c;}
+.grade.e6{background:#6f6a60;}
+.grade.warn{background:var(--red);}
+
+/* ── 待批占位：交付前必须清零 ── */
+.todo{
+  margin:14px 0; padding:12px 16px; background:var(--warnbg);
+  border-left:3px solid var(--red); font-size:13.5px; text-indent:0;
+}
+.todo b{color:var(--red); letter-spacing:.06em;}
+.todo ul{margin:8px 0 0; padding-left:1.4em;}
+.todo li{margin-bottom:4px;}
+
+/* ── 版面：左目录 + 右纸页（P8 新增）──
+ * 十九板块篇幅长，读者要能跳；目录 sticky，滚动常驻。
+ * 窄屏（<1100px）自动收起目录，纸页满宽——手机上看仍是单栏书页。 */
+.layout{
+  display:grid; grid-template-columns:212px minmax(0,900px);
+  gap:34px; max-width:1180px; margin:0 auto; align-items:start;
+  padding:0 16px;
+}
+.toc{
+  position:sticky; top:22px; max-height:calc(100vh - 44px); overflow:auto;
+  padding:18px 0 18px 4px; font-size:12.5px; line-height:1.55;
+  color:var(--ink2);
+}
+.toc-t{
+  font-size:12px; letter-spacing:.42em; color:var(--blue);
+  padding-bottom:8px; margin-bottom:8px; border-bottom:1px solid var(--line);
+}
+.toc-g{
+  font-size:11px; letter-spacing:.18em; color:var(--ink3);
+  margin:12px 0 4px;
+}
+.toc ol{list-style:none; margin:0; padding:0;}
+.toc li{margin:0;}
+.toc li a{
+  display:block; padding:3px 6px; color:var(--ink2); text-decoration:none;
+  border-left:2px solid transparent; transition:color .12s,border-color .12s;
+}
+.toc li a:hover{color:var(--red); border-left-color:var(--red); background:#f4efe3;}
+.toc-sec li a{padding-left:10px;}
+.toc-sec li a::before{content:"";}
+
+@media (max-width:1100px){
+  .layout{grid-template-columns:1fr; gap:0; max-width:900px;}
+  .toc{display:none;}
+  .sheet{margin:16px auto;}
+}
+
+/* ── 判断强度：三档角标（P8 新增，报告的灵魂之二）──
+ * 网友版每句都一样肯定；本包要求「哪里硬、哪里软」写在同一张纸上。
+ * 确断=墨蓝实心；倾向=赭石描边；存疑=灰虚边。不用红绿——吉凶不属于这一层。 */
+.tag{
+  display:inline-block; font-size:11px; line-height:1.5;
+  padding:0 .4em; margin-right:.35em; border-radius:2px;
+  letter-spacing:.06em; text-indent:0; vertical-align:.05em;
+  font-family:"Songti SC","SimSun",serif;
+}
+.tag.g1{background:var(--blue); color:#fff;}
+.tag.g2{background:#f3e6d2; color:#8a5b1e; border:1px solid #d9c39b;}
+.tag.g3{background:#fff; color:var(--ink3); border:1px dashed #b8b0a0;}
+
+/* ── 卷首／附录：视觉上明确切出十九板块之外 ── */
+h2.front{color:var(--blue); border-bottom-width:2px;}
+h2.front::before{
+  content:"卷首"; display:inline-block; font-size:11px; letter-spacing:.18em;
+  color:#fff; background:var(--blue); padding:.1em .5em; margin-right:.7em;
+  vertical-align:.12em; border-radius:2px;
+}
+h2.app{color:var(--red); border-bottom:3px double var(--line);}
+h2.app::before{
+  content:"附录"; display:inline-block; font-size:11px; letter-spacing:.18em;
+  color:#fff; background:var(--red); padding:.1em .5em; margin-right:.7em;
+  vertical-align:.12em; border-radius:2px;
+}
+
+/* 卷首里的「材料清点」表：状态列允许换行，影响列左对齐 */
+h2.front + p + h3 + table td, h2.front + table td{vertical-align:top;}
+
+/* 卷首两表：短列不许断字（否则「部分」会竖排成两行） */
+table.flow td:nth-child(1){white-space:nowrap;}
+table.flow td:nth-child(2){white-space:nowrap; text-align:center;}
+table.flow2 td:nth-child(1){white-space:nowrap; text-align:center; color:var(--ink3);}
+table.flow2 td:nth-child(3){white-space:nowrap; text-align:center;}
+table.flow2 td:nth-child(2){text-align:left;}
+
+/* 证据折叠：出处在正文里可展开，不打断阅读 */
+details.evbox{
+  margin:10px 0 16px; font-size:12.5px; color:var(--ink2);
+  border-left:2px solid var(--line); padding-left:12px;
+}
+details.evbox summary{cursor:pointer; color:var(--blue); letter-spacing:.04em;}
+details.evbox summary::-webkit-details-marker{display:none;}
+details.evbox summary::before{content:"▸ "; }
+details.evbox[open] summary::before{content:"▾ "; }
+
+/* 附录里的大表（证据索引）字号再收一档，免得溢出 */
+h2.app ~ table{font-size:12px;}
+
+/* ── 结语与页脚 ── */
+blockquote{
+  margin:0 0 30px; padding:12px 18px; background:#f4efe3;
+  border-left:3px solid var(--blue); font-size:13px; color:var(--ink2); line-height:1.8;
+}
+hr{border:0; border-top:1px dashed var(--line); margin:32px 0;}
+footer{
+  margin-top:50px; padding-top:16px; border-top:1px solid var(--line);
+  font-size:12px; color:var(--ink3); line-height:1.8; text-align:center; letter-spacing:.1em;
+}
+
+/* 附录轨挂在报告末时用：视觉上明确切出去 */
+section.appendix{
+  margin-top:60px; padding-top:8px; border-top:3px double var(--line);
+}
+section.appendix h2{color:var(--red);}
+
+@media print{
+  body{background:#fff; font-size:10.5pt;}
+  .sheet{box-shadow:none; margin:0; max-width:none; padding:18mm 16mm; border-top-width:4px;}
+  h2{page-break-after:avoid;}
+  table{page-break-inside:avoid;}
+  .todo{page-break-inside:avoid;}
+}
+</style>
+</head>
+<body>
+<div class="layout">
+<nav class="toc">
+<div class="toc-t">目　录</div>
+<div class="toc-g">卷首</div><ol class="toc-front">
+<li><a href="#s1">批断流程与材料清点</a></li>
+<li><a href="#s2">盘面速览</a></li>
+</ol>
+<div class="toc-g">十九板块</div><ol class="toc-sec">
+<li><a href="#s3">①　基本信息</a></li>
+<li><a href="#s4">②　四柱排盘</a></li>
+<li><a href="#s5">③　五行十神</a></li>
+<li><a href="#s6">④　刑冲合会与神煞</a></li>
+<li><a href="#s7">⑤　格局分析</a></li>
+<li><a href="#s8">⑥　日主调候</a></li>
+<li><a href="#s9">⑦　用神全景</a></li>
+<li><a href="#s10">⑧　六亲专题</a></li>
+<li><a href="#s11">⑨　大运走势</a></li>
+<li><a href="#s12">⑩　流年</a></li>
+<li><a href="#s13">⑪　人生建议</a></li>
+<li><a href="#s14">⑫　学业</a></li>
+<li><a href="#s15">⑬　事业</a></li>
+<li><a href="#s16">⑭　财富</a></li>
+<li><a href="#s17">⑮　人际</a></li>
+<li><a href="#s18">⑯　健康</a></li>
+<li><a href="#s19">⑰　年度行动指南</a></li>
+<li><a href="#s20">⑱　风险与禁忌</a></li>
+<li><a href="#s21">⑲　总纲</a></li>
+</ol>
+<div class="toc-g">附录</div><ol class="toc-app">
+<li><a href="#s22">存疑与反证</a></li>
+<li><a href="#s23">证据索引</a></li>
+</ol>
+</nav>
+<div class="sheet">
+<header>
+<div class="kicker">十　九　板　块</div>
+<h1>分析报告</h1>
+<div class="sub">依梁湘润批例体例　·　每节挂证　·　判断分三档</div>
+</header>
+<div class="meta">　　　　·　证据等级 E1–E6　·　查不出即写查不出</div>
+<blockquote>本件为分析件（交付件 B）：逐条挂证，供复核。与命书分轨——命书是断语体、零工程标记，两件不可混。</blockquote>
+<blockquote>判断强度分三档（<span class="tag g1" title="三路以上独立来源同向，且所据条目无一落在未决／冲突开放项内">确断</span><span class="tag g2" title="两路同向，或三路中有一路方向相反已权衡、或有一路所据条目未定">倾向</span><span class="tag g3" title="仅一路来源，或所据条目 verification_status 非「已核」，只可写「或可」「待验」">存疑</span>），口径见卷首第三节；一卷之内，硬处与软处须分得开。 骨架由 <span class="ev">tools/report_gen.py</span> 生成，判断类板块已逐节落笔：结构取自 E6 实算，断语逐条挂证， 证据索引见附二，自陈薄弱处见附一。</blockquote>
+<h2 id="s1" class="front">批断流程与材料清点</h2>
+<p>本卡不计入十九板块。读者先看此卡，再看断语：<strong>批者手上有什么、做到哪一步、哪一步因缺料未做</strong>，都在这里写明。缺料之处，报告标「查不出」而不硬填——把「没算」读成「没事」，是批命最常见的一种误读。</p>
+<h3>一、材料清点</h3>
+<table>
+<tr><th>项</th><th>状态</th><th>对本次批断的影响</th></tr>
+<tr><td class="nw">性别</td><td class="l">已给（男）</td><td class="l">六亲取用与 scope 过滤据此；未给则女命专章不出</td></tr>
+<tr><td class="nw">四柱</td><td class="l">已给／已由 paipan 排出</td><td class="l">E6 结构计算，年月日时俱全</td></tr>
+<tr><td class="nw">出生经度</td><td class="l"><strong>未给</strong></td><td class="l">真太阳时<strong>未校正</strong>；经度差四度即差一分钟以上，时辰临界之造会因此换柱，本报告不默认已校正</td></tr>
+<tr><td class="nw">起运岁</td><td class="l">已给（虚岁 8）</td><td class="l">大运表可标起运虚岁</td></tr>
+<tr><td class="nw">生年</td><td class="l">已给（1953）</td><td class="l">流年可换算虚岁</td></tr>
+<tr><td class="nw">大运干支</td><td class="l">已给 8 步</td><td class="l">第九节五法逐运可判</td></tr>
+<tr><td class="nw">流年</td><td class="l">已给 5 年</td><td class="l">第十节可出应期</td></tr>
+</table>
+<h3>二、六步执行状态</h3>
+<table>
+<tr><th>步</th><th>内容</th><th>状态</th><th>依据</th><th>未完之由／分寸</th></tr>
+<tr><td class="nw">1</td><td class="l">定盘：四柱、旬空、真太阳时</td><td class="nw">部分</td><td class="l"><span class="ev">tools/paipan.py</span>（E6）</td><td class="l">真太阳时未校正，时辰临界者可能换柱</td></tr>
+<tr><td class="nw">2</td><td class="l">神煞四表实查＋神煞探源起例</td><td class="nw">做到</td><td class="l"><span class="ev">JS-SS-01</span>～<span class="ev">04</span>；<span class="ev">R-SP-*</span> 49 条</td><td class="l">只报见／不见与落点，<strong>不判吉凶</strong>（两说并存，不代裁）</td></tr>
+<tr><td class="nw">3</td><td class="l">格局裁定：取格→格名→顺逆成败</td><td class="nw">做到</td><td class="l"><span class="ev">R-SS-002</span>／<span class="ev">R34</span>／<span class="ev">R73</span>／<span class="ev">R74</span></td><td class="l">格名「羊刃格」；三层皆落算</td></tr>
+<tr><td class="nw">4</td><td class="l">调候：原表取候选，逐字判透藏无</td><td class="nw">做到</td><td class="l"><span class="ev">TAB-LXR-TH-01-ORIG</span>（120 格）</td><td class="l">原表列 1–5 个候选<strong>不分主次</strong>；分了就是替梁氏作主</td></tr>
+<tr><td class="nw">5</td><td class="l">用神六路：调候／扶抑／通关／十干喜忌／格局需求／忌神复核</td><td class="nw">做到</td><td class="l">六路各挂 rule_id</td><td class="l"><strong>不计票、不排名、不打分</strong>；某路不适用者明写「不适用」</td></tr>
+<tr><td class="nw">6</td><td class="l">流年应期：运定十年→年定年份→月定月份</td><td class="nw">部分</td><td class="l">流年类 rule_id</td><td class="l">流月<strong>无材料</strong>，只到年不到月</td></tr>
+</table>
+<h3>三、本件边界</h3>
+<ul><li><strong>不代裁两说。</strong> 同一事而书有两说者（如神煞吉凶、旬空基准），本件并列而不择一。</li><li><strong>不补通行术数。</strong> 梁氏书无者（纳音断语、楼层、星级），本件不写；引通行说法必另立附录并声明「非梁氏原文」。</li><li><strong>不用分数冒充精度。</strong> 判断只给三档强度（确断／倾向／存疑），不给星级与百分比——星级不可证，最易「以包准自居」。</li><li><strong>分寸语。</strong> 原书语：能有个七成应验，就算合理合宜。本件不作「必然」「注定」之断。</li></ul>
+<h2 id="s2" class="front">盘面速览</h2>
+<h3>四柱盘</h3>
+<table>
+<tr><th>柱</th><th>干</th><th>支</th><th>十神</th><th>藏干</th><th>旬空</th></tr>
+<tr><td class="nw">年</td><td class="nw">癸</td><td class="nw">巳</td><td class="nw">正官</td><td class="l">丙比肩／戊食神／庚偏财</td><td class="nw">午未</td></tr>
+<tr><td class="nw">月</td><td class="nw">戊</td><td class="nw">午</td><td class="nw">食神</td><td class="l">丁劫财／己伤官</td><td class="nw">子丑</td></tr>
+<tr><td class="nw">日</td><td class="nw">丙</td><td class="nw">午</td><td class="nw">日主</td><td class="l">丁劫财／己伤官</td><td class="nw">寅卯</td></tr>
+<tr><td class="nw">时</td><td class="nw">壬</td><td class="nw">辰</td><td class="nw">七杀</td><td class="l">戊食神／乙正印／癸正官</td><td class="nw">午未</td></tr>
+</table>
+<h3>速览四点</h3>
+<ul><li><strong>日主与月令</strong>：丙日主·午月令。日主丙，生于午月，当令。</li><li><strong>格局</strong>：羊刃格。本气不透；逆用</li><li><strong>五行</strong>：木1　火4　土5　金1　水3。五行不缺</li><li><strong>神煞</strong>：四表见 6 项（只报见否，不判吉凶）；神煞探源起例命中 11 条。</li></ul>
+<h3>一句话定调</h3>
+<p><span class="tag g1" title="三路以上独立来源同向，且所据条目无一落在未决／冲突开放项内">确断</span><strong>羊刃驾杀，一生之要在「有制」。</strong> 丙火生午月，日坐刃，火土成势；全局唯一能制此刃者，是时干壬水七杀。所以这一生走得顺不顺，不看他补了多少火，只看那股过盛的劲有没有被导进一个要担责、有规矩的去处。</p>
+<p><span class="tag g2" title="两路同向，或三路中有一路方向相反已权衡、或有一路所据条目未定">倾向</span>格局虽成，而制神偏弱（月干戊土食神克壬，制杀太过），是「本事有、舞台小」之象——非无本事，是常被琐务拖住。此一层只作倾向，因食神制杀之轻重，原书未给字数式，须以实际行运验。</p>
+<p>依据：<span class="ev">R-SS-002</span>、<span class="ev">R-SS-022／R243</span>、<span class="ev">T-ORIG-TH01-029</span>。</p>
+<h2 id="s3"><span class="no">①</span>基本信息</h2>
+<table>
+<tr><th>项</th><th>值</th></tr>
+<tr><td class="nw">性别</td><td class="l">男</td></tr>
+<tr><td class="nw">四柱</td><td class="l">癸巳　戊午　丙午　壬辰</td></tr>
+<tr><td class="nw">日主</td><td class="l">丙（火）</td></tr>
+<tr><td class="nw">月令</td><td class="l">午月（夏）</td></tr>
+<tr><td class="nw">格局</td><td class="l">羊刃格·逆用（该逆得逆）</td></tr>
+<tr><td class="nw">起运</td><td class="l">虚岁 8 岁</td></tr>
+<tr><td class="nw">现行大运</td><td class="l">须按流年定（见第九、十节）</td></tr>
+<tr><td class="nw">流年</td><td class="l">2026、2027、2028、2029、2030</td></tr>
+</table>
+<p>真太阳时：<strong>未校正</strong>（未给出生经度）。本报告不默认已校正——经度差四度即差一分钟以上，时辰临界之造会因此换柱，须补经度后重排。</p>
+<p>证据：四柱为 E6 结构计算；格局挂 <span class="ev">R-SS-002</span>、<span class="ev">R-SS-022／R243</span>、<span class="ev">R-SS-022／R74／R-SS-017</span>、<span class="ev">R243</span>、<span class="ev">R34</span>、<span class="ev">R73</span>。</p>
+<h2 id="s4"><span class="no">②</span>四柱排盘</h2>
+<table>
+<tr><th>柱</th><th>干支</th><th>十神</th><th>藏干（本气·中气·余气）</th><th>旬空</th></tr>
+<tr><td class="nw">年</td><td class="nw">癸巳</td><td class="nw">正官</td><td class="l">丙比肩／戊食神／庚偏财</td><td class="nw">午未</td></tr>
+<tr><td class="nw">月</td><td class="nw">戊午</td><td class="nw">食神</td><td class="l">丁劫财／己伤官</td><td class="nw">子丑</td></tr>
+<tr><td class="nw">日</td><td class="nw">丙午</td><td class="nw">日主</td><td class="l">丁劫财／己伤官</td><td class="nw">寅卯</td></tr>
+<tr><td class="nw">时</td><td class="nw">壬辰</td><td class="nw">七杀</td><td class="l">戊食神／乙正印／癸正官</td><td class="nw">午未</td></tr>
+</table>
+<p>纳音：本包<strong>无纳音规则</strong>（<span class="ev">rules.csv</span> 检索「纳音」0 命中），故本报告不出纳音断语——查不出即写查不出，不拿通行表补。</p>
+<p>旬空两说并列：按日柱 丙午 之旬，空在 寅卯；按年柱 癸巳 之旬，空在 午未。基准未定，不代裁（<span class="ev">R-SZ-025</span> 论空亡大运时另有所取）。</p>
+<h3>大运表</h3>
+<table>
+<tr><th>运次</th><th>干支</th><th>起运</th></tr>
+<tr><td class="nw">1</td><td class="nw">丁巳</td><td class="l">虚岁 8 起</td></tr>
+<tr><td class="nw">2</td><td class="nw">丙辰</td><td class="l">虚岁 18 起</td></tr>
+<tr><td class="nw">3</td><td class="nw">乙卯</td><td class="l">虚岁 28 起</td></tr>
+<tr><td class="nw">4</td><td class="nw">甲寅</td><td class="l">虚岁 38 起</td></tr>
+<tr><td class="nw">5</td><td class="nw">癸丑</td><td class="l">虚岁 48 起</td></tr>
+<tr><td class="nw">6</td><td class="nw">壬子</td><td class="l">虚岁 58 起</td></tr>
+<tr><td class="nw">7</td><td class="nw">辛亥</td><td class="l">虚岁 68 起</td></tr>
+<tr><td class="nw">8</td><td class="nw">庚戌</td><td class="l">虚岁 78 起</td></tr>
+</table>
+<p>起运岁由 <span class="ev">paipan.py</span> 定；本表只承干支次序，不重推节气。</p>
+<h2 id="s5"><span class="no">③</span>五行十神</h2>
+<table>
+<tr><th>五行</th><th>计数（含藏干）</th></tr>
+<tr><td class="nw">木</td><td class="nw">1</td></tr>
+<tr><td class="nw">火</td><td class="nw">4</td></tr>
+<tr><td class="nw">土</td><td class="nw">5</td></tr>
+<tr><td class="nw">金</td><td class="nw">1</td></tr>
+<tr><td class="nw">水</td><td class="nw">3</td></tr>
+<tr><td class="nw">合计</td><td class="nw">14</td></tr>
+</table>
+<p>缺行：五行不缺。</p>
+<h3>十神分布</h3>
+<table>
+<tr><th>十神</th><th>计数</th></tr>
+<tr><td class="nw">食神</td><td class="nw">3</td></tr>
+<tr><td class="nw">正官</td><td class="nw">2</td></tr>
+<tr><td class="nw">劫财</td><td class="nw">2</td></tr>
+<tr><td class="nw">伤官</td><td class="nw">2</td></tr>
+<tr><td class="nw">比肩</td><td class="nw">1</td></tr>
+<tr><td class="nw">偏财</td><td class="nw">1</td></tr>
+<tr><td class="nw">七杀</td><td class="nw">1</td></tr>
+<tr><td class="nw">正印</td><td class="nw">1</td></tr>
+</table>
+<p><strong>等权计数，不作旺衰加权。</strong> 梁氏不以数字量化强弱（<span class="ev">R01</span> 斥「一上手就讲日主强、选用神谈喜忌」之弊）；本节只作分布描述，<strong>不得由计数直推身强身弱</strong>，那要另走扶抑一路（第七节）。</p>
+<h2 id="s6"><span class="no">④</span>刑冲合会与神煞</h2>
+<table>
+<tr><th>关系</th><th>成员</th><th>落点</th><th>表值</th></tr>
+<tr><td class="nw">自刑</td><td class="nw">午、午</td><td class="nw">午(月/日)</td><td class="l"><span class="ev">T-X11-XJ02-012</span></td></tr>
+</table>
+<p>刑冲合会按 <span class="ev">TB-XJ*</span> 系列逐格对读；拱夹另见 <span class="ev">R-JC-01</span>～<span class="ev">07</span>（《子平基础概要》p154–156），<strong>写「拱得某支」不写「明见某支」</strong>。</p>
+<h3>神煞（四表实查）</h3>
+<table>
+<tr><th>神煞</th><th>查法（表）</th><th>格值</th><th>见否</th><th>落柱</th><th>表值</th></tr>
+<tr><td class="nw">孤辰</td><td class="l">JS-SS-01</td><td class="nw">巳→申</td><td class="nw">不见</td><td class="l">—</td><td class="l"><span class="ev">JS-SS-01-006</span></td></tr>
+<tr><td class="nw">寡宿</td><td class="l">JS-SS-01</td><td class="nw">巳→辰</td><td class="nw">见</td><td class="l">时柱壬辰</td><td class="l"><span class="ev">JS-SS-01-018</span></td></tr>
+<tr><td class="nw">大耗</td><td class="l">JS-SS-01</td><td class="nw">巳→子</td><td class="nw">不见</td><td class="l">—</td><td class="l"><span class="ev">JS-SS-01-030</span></td></tr>
+<tr><td class="nw">天德</td><td class="l">JS-SS-02</td><td class="nw">午→亥</td><td class="nw">不见</td><td class="l">—</td><td class="l"><span class="ev">JS-SS-02-043</span></td></tr>
+<tr><td class="nw">月德</td><td class="l">JS-SS-02</td><td class="nw">午→丙</td><td class="nw">见</td><td class="l">日柱丙午</td><td class="l"><span class="ev">JS-SS-02-055</span></td></tr>
+<tr><td class="nw">天乙贵人</td><td class="l">JS-SS-03</td><td class="nw">丙→酉亥</td><td class="nw">不见</td><td class="l">—</td><td class="l"><span class="ev">JS-SS-03-063</span></td></tr>
+<tr><td class="nw">文昌贵人</td><td class="l">JS-SS-03</td><td class="nw">丙→申</td><td class="nw">不见</td><td class="l">—</td><td class="l"><span class="ev">JS-SS-03-073</span></td></tr>
+<tr><td class="nw">羊刃</td><td class="l">JS-SS-03</td><td class="nw">丙→午</td><td class="nw">见</td><td class="l">月柱戊午、日柱丙午</td><td class="l"><span class="ev">JS-SS-03-082</span></td></tr>
+<tr><td class="nw">干禄</td><td class="l">JS-SS-03</td><td class="nw">丙→巳</td><td class="nw">见</td><td class="l">年柱癸巳</td><td class="l"><span class="ev">JS-SS-03-088</span></td></tr>
+<tr><td class="nw">红艳煞</td><td class="l">JS-SS-03</td><td class="nw">丙→寅</td><td class="nw">不见</td><td class="l">—</td><td class="l"><span class="ev">JS-SS-03-098</span></td></tr>
+<tr><td class="nw">将星</td><td class="l">JS-SS-04</td><td class="nw">午→午</td><td class="nw">见</td><td class="l">月柱戊午、日柱丙午</td><td class="l"><span class="ev">JS-SS-04-112</span></td></tr>
+<tr><td class="nw">华盖</td><td class="l">JS-SS-04</td><td class="nw">午→戌</td><td class="nw">不见</td><td class="l">—</td><td class="l"><span class="ev">JS-SS-04-124</span></td></tr>
+<tr><td class="nw">驿马</td><td class="l">JS-SS-04</td><td class="nw">午→申</td><td class="nw">不见</td><td class="l">—</td><td class="l"><span class="ev">JS-SS-04-136</span></td></tr>
+<tr><td class="nw">劫煞</td><td class="l">JS-SS-04</td><td class="nw">午→亥</td><td class="nw">不见</td><td class="l">—</td><td class="l"><span class="ev">JS-SS-04-148</span></td></tr>
+<tr><td class="nw">亡神</td><td class="l">JS-SS-04</td><td class="nw">午→巳</td><td class="nw">见</td><td class="l">年柱癸巳</td><td class="l"><span class="ev">JS-SS-04-160</span></td></tr>
+<tr><td class="nw">桃花</td><td class="l">JS-SS-04</td><td class="nw">午→卯</td><td class="nw">不见</td><td class="l">—</td><td class="l"><span class="ev">JS-SS-04-172</span></td></tr>
+</table>
+<p><strong>只报见／不见与落点，不判吉凶。</strong> 神煞吉凶两说并存（<span class="ev">R-MF-044</span>～<span class="ev">046</span> 与 p027 命名说），本报告不代裁。起法以《子平基础概要》原表四张为准：年支查孤辰寡宿大耗、月支查天月德、日干查天乙文昌羊刃干禄红艳、日支查将星华盖驿马劫煞亡神桃花。</p>
+<h3>神煞探源起例（R-SP-001～049）</h3>
+<p>与上表互补：上表是《子平基础概要》的神煞例表，此表是《神煞探源》各条的<strong>起例</strong>。总计：不成立 33、命中 11、待人工 4、原文待核 1。</p>
+<table>
+<tr><th>规则</th><th>神煞</th><th>结果</th><th>依据</th><th>锚</th></tr>
+<tr><td class="l">R-SP-005</td><td class="l">天刑杀／体弱多病</td><td class="nw">命中</td><td class="l">年支巳当值之干为壬，时干亦壬</td><td class="nw">SP:s21</td></tr>
+<tr><td class="l">R-SP-007</td><td class="l">雷霆杀／猝然临难</td><td class="nw">原文待核</td><td class="l">5月生，原文作「五十一甲位」——甲为天干，与「时支」体例不合，待核</td><td class="nw">SP:s22</td></tr>
+<tr><td class="l">R-SP-014</td><td class="l">咸池／艺术性格</td><td class="nw">待人工</td><td class="l">原文以「旺宫／衰宫＋坐空亡＋带七杀」合参，无字数式起例，本器不落算</td><td class="nw">SP:s29</td></tr>
+<tr><td class="l">R-SP-019</td><td class="l">破字／身体</td><td class="nw">待人工</td><td class="l">破字（甲癸未申酉）计 1 个；原文作「会聚多」，未给门槛，本器只报计数不判</td><td class="nw">SP:s30</td></tr>
+<tr><td class="l">R-SP-020</td><td class="l">明代统计七则</td><td class="nw">待人工</td><td class="l">原文为七则统计性观察，未列可执行起例，本器不落算</td><td class="nw">SP:s30</td></tr>
+<tr><td class="l">R-SP-022</td><td class="l">子平关／小儿关</td><td class="nw">命中</td><td class="l">丙日见壬，见于时干</td><td class="nw">SP:s32</td></tr>
+<tr><td class="l">R-SP-024</td><td class="l">鬼限／寿限</td><td class="nw">命中</td><td class="l">年纳音水，运岁见丁巳</td><td class="nw">SP:s33</td></tr>
+<tr><td class="l">R-SP-028</td><td class="l">夭年煞／年时相对</td><td class="nw">待人工</td><td class="l">诗诀「猪鼠无良犬战牛…」须先由生肖转支，原书对照表为图版，未转录，本器不落算</td><td class="nw">SP:s35</td></tr>
+<tr><td class="l">R-SP-029</td><td class="l">急脚煞／运程</td><td class="nw">命中</td><td class="l">日干丙，运见壬子</td><td class="nw">SP:s36</td></tr>
+<tr><td class="l">R-SP-035</td><td class="l">天罗地网／定义</td><td class="nw">命中</td><td class="l">四柱见地网辰巳</td><td class="nw">SP:s41</td></tr>
+<tr><td class="l">R-SP-037</td><td class="l">天罗地网／会齐即论</td><td class="nw">命中</td><td class="l">四柱＋运 丁巳／丙辰／乙卯／甲寅／癸丑／壬子／辛亥／庚戌会齐戌亥、辰巳</td><td class="nw">SP:s41</td></tr>
+<tr><td class="l">R-SP-039</td><td class="l">孤辰寡宿／血光四组</td><td class="nw">命中</td><td class="l">日支午／时支辰成血光组（互换）</td><td class="nw">SP:s42</td></tr>
+<tr><td class="l">R-SP-044</td><td class="l">空亡／减半之义</td><td class="nw">命中</td><td class="l">年柱癸巳旬空午未而日支午在其中（年日互换空亡，原文所忌）</td><td class="nw">SP:s47</td></tr>
+<tr><td class="l">R-SP-046</td><td class="l">羊刃／必带官印</td><td class="nw">命中</td><td class="l">命带羊刃（日、月），官（金）印（木）俱见</td><td class="nw">SP:s49</td></tr>
+<tr><td class="l">R-SP-047</td><td class="l">羊刃／叠位与残疾</td><td class="nw">命中</td><td class="l">日支午叠见 2 位，又见刃午（羊刃相蚀）</td><td class="nw">SP:s49</td></tr>
+<tr><td class="l">R-SP-048</td><td class="l">亡神与劫煞／内外之别</td><td class="nw">命中</td><td class="l">亡神（年癸巳）——凶来自内</td><td class="nw">SP:s51</td></tr>
+</table>
+<p>起例照原文；原文只给诗诀、或对照表为图版者标「待人工对表」，讹字标「原文待核」——<strong>不猜、不以通行术数补</strong>。起例成立只说明结构合，不等于应验（原文自陈「不是百分之一百」）；神煞本身不判吉凶，须与日主论生克。</p>
+<h2 id="s7"><span class="no">⑤</span>格局分析</h2>
+<p>月令午，本气丁（劫财）。月令午藏干全不透，依 R-SS-002「月支优先、不论透否」取本气丁，得<strong>羊刃格</strong>，属<strong>逆用</strong>（<span class="ev">R74／R-SS-017</span>）。</p>
+<table>
+<tr><th>项</th><th>十神</th><th>判定</th><th>落点</th><th>依据</th></tr>
+<tr><td class="nw">反克之神</td><td class="nw">七杀</td><td class="nw">见</td><td class="nw">时干壬（透）</td><td class="l"><span class="ev">R-SS-022／R243</span></td></tr>
+</table>
+<p>结构结论：<strong>该逆得逆（有反克之神）</strong>。</p>
+<p>外格：羊刃带七杀，依 R243 作外格（羊刃驾杀）。</p>
+<p>本报告<strong>只断结构成立与否，不断吉凶与富贵层次</strong>。相神（<span class="ev">R-SS-033</span>／<span class="ev">034</span>）、有情有力（<span class="ev">R-SS-028</span>～<span class="ev">030</span>）、十四制式（<span class="ev">R-SS-036</span>～<span class="ev">041</span>）、双格轻重（<span class="ev">R-SS-024</span>～<span class="ev">026</span>）未落算，须人工对条文。</p>
+<p>依据：<span class="ev">R-SS-002</span>、<span class="ev">R-SS-022／R243</span>、<span class="ev">R-SS-022／R74／R-SS-017</span>、<span class="ev">R243</span>、<span class="ev">R34</span>、<span class="ev">R73</span>。</p>
+<h2 id="s8"><span class="no">⑥</span>日主调候</h2>
+<table>
+<tr><th>格值出处</th><th>调候字</th><th>原局满足度</th></tr>
+<tr><td class="l"><span class="ev">T-ORIG-TH01-029</span></td><td class="nw">壬庚</td><td class="l">壬：透于时柱；庚：藏于年</td></tr>
+</table>
+<p>原表：余氏調候用神表（行卯版原表 10×12，并陈）。</p>
+<p>原表一格列 2–5 字，<strong>不分主次</strong>。本报告照列，不排第一第二——分了就是替梁氏作主。用神之取捨见第七节各路。</p>
+<p>依据：<span class="ev">T-ORIG-TH01-029</span>（E1 原表，119/120 格已核）。</p>
+<h2 id="s9"><span class="no">⑦</span>用神全景</h2>
+<table>
+<tr><th>路</th><th>所据</th><th>本案所取</th><th>状态</th></tr>
+<tr><td class="nw">调候用神</td><td class="l">《栏江网》（R-SZ-011）</td><td class="l">丙日×午月格值：壬庚</td><td class="nw">适用</td></tr>
+<tr><td class="nw">格局用神</td><td class="l">《子平真诠》（R-SZ-012）</td><td class="l">羊刃格·逆用；月令午藏干全不透，依 R-SS-002「月支优先、不论透否」取本气丁</td><td class="nw">适用</td></tr>
+<tr><td class="nw">病药用神</td><td class="l">R-SZ-013</td><td class="l">五行不缺，未见明显之病</td><td class="nw">不适用</td></tr>
+<tr><td class="nw">专旺用神</td><td class="l">R-SZ-014</td><td class="l">非魁罡名目；从旺从势须另核</td><td class="nw">不适用</td></tr>
+<tr><td class="nw">扶抑用神</td><td class="l">R-SZ-015（第五级，非第一级）</td><td class="l">夏冬生人依 R-SZ-016 不论身强弱</td><td class="nw">不适用</td></tr>
+</table>
+<p>上表为<strong>本器落算之五路</strong>；规格所列六路中的「日主十干喜忌」与「忌神复核」两路，本器不单列（十干喜忌散在 <span class="ev">R-SZ</span> 日用条，忌神复核见第五节忌神表），须人工对条文，<strong>不得以五路当六路</strong>。</p>
+<p>各路并列，<strong>不排名、不计票、不打分</strong>。梁氏无「第一用神／第二用神」之说；某路不适用须写「不适用」及理由，不得跳过。</p>
+<p>日主十干喜忌（<span class="ev">R-SZ</span> 日用）与调候（<span class="ev">R-SZ-011</span>）孰先，F06 未裁；本报告两说并列，不代定次序。</p>
+<h2 id="s10"><span class="no">⑧</span>六亲专题</h2>
+<p>本节只判<strong>结构</strong>：星在哪、宫如何、运何时动。至于「怎么办」，见第十五节。</p>
+<table>
+<tr><th>项</th><th>星</th><th>宫</th><th>行运</th><th>判定</th></tr>
+<tr><td class="nw">妻</td><td class="l">财（庚）藏年支巳，不透</td><td class="l">日支午，羊刃；与月支午自刑</td><td class="l">壬子运双冲日柱（<span class="ev">R-MF-015</span>）</td><td class="l"><span class="tag g1" title="三路以上独立来源同向，且所据条目无一落在未决／冲突开放项内">确断</span>婚宜迟，忌早成</td></tr>
+<tr><td class="nw">财</td><td class="l">庚藏巳，巳为庚之长生</td><td class="l">—</td><td class="l">辛亥运辛透亥禄</td><td class="l"><span class="tag g1" title="三路以上独立来源同向，且所据条目无一落在未决／冲突开放项内">确断</span>有源不显，能守难暴</td></tr>
+<tr><td class="nw">父</td><td class="l">偏财庚藏，不透</td><td class="l">年柱癸巳，癸被月干戊合</td><td class="l">—</td><td class="l"><span class="tag g2" title="两路同向，或三路中有一路方向相反已权衡、或有一路所据条目未定">倾向</span>父星不显，早年家门之事不由己</td></tr>
+<tr><td class="nw">母</td><td class="l">正印乙藏时支辰，不透</td><td class="l">落时柱，不在年月</td><td class="l">—</td><td class="l"><span class="tag g2" title="两路同向，或三路中有一路方向相反已权衡、或有一路所据条目未定">倾向</span>母缘后至</td></tr>
+<tr><td class="nw">子</td><td class="l">七杀壬透时干，坐辰（水库）</td><td class="l">时柱子女宫，辰与巳无合无冲</td><td class="l">—</td><td class="l"><span class="tag g1" title="三路以上独立来源同向，且所据条目无一落在未决／冲突开放项内">确断</span>得子不迟，子息不弱</td></tr>
+<tr><td class="nw">寿</td><td class="l">丙火生午月，气厚</td><td class="l">日坐羊刃</td><td class="l">壬子双冲日柱、冲提并起</td><td class="l"><span class="tag g2" title="两路同向，或三路中有一路方向相反已权衡、或有一路所据条目未定">倾向</span>所虑在壬子一步</td></tr>
+</table>
+<p><strong>妻</strong>：<span class="tag g1" title="三路以上独立来源同向，且所据条目无一落在未决／冲突开放项内">确断</span>财星藏而不透，妻缘不早显；妻宫坐刃，又与月支自刑，宫内不安；壬子双冲日柱，中年有动。三路同向，故断「婚宜迟，忌早成」。<span class="tag g2" title="两路同向，或三路中有一路方向相反已权衡、或有一路所据条目未定">倾向</span>成家后聚少离多，或有一度周折——此为「星弱宫刃」之常见象，<strong>非必离</strong>。原书无「克妻」明文，本报告不作此断。</p>
+<p><strong>财</strong>：<span class="tag g1" title="三路以上独立来源同向，且所据条目无一落在未决／冲突开放项内">确断</span>财藏于长生，有本可生，能守不能暴发。食伤五见而金泄不出，是「有生意而无变现之渠」——任氏终身行医，正是技艺换财而非资本生财，与此象合。<span class="ev">R46</span> 论「四柱无财与财坐空亡」，本造非无财，不套该条。</p>
+<p><strong>父母</strong>：<span class="tag g2" title="两路同向，或三路中有一路方向相反已权衡、或有一路所据条目未定">倾向</span>父星庚藏年支巳而不透，年月之间癸戊相合、年干正官被月干食神合去，主早年家门之事不由己；母取印，正印乙木藏时支辰、落时柱而非年月，主母缘后至、或依母之力在中年以后。二项各只两路，按门槛只作倾向，不作断。</p>
+<p><strong>子</strong>：<span class="tag g1" title="三路以上独立来源同向，且所据条目无一落在未决／冲突开放项内">确断</span>男命以官杀为子，七杀壬透时干、坐辰（水库），子星透而有用；且壬为调候所取（<span class="ev">T-ORIG-TH01-029</span>），子星恰是全局枢机。两路而方向极强，故晋为确断。<span class="tag g2" title="两路同向，或三路中有一路方向相反已权衡、或有一路所据条目未定">倾向</span>时支辰与年支巳无合无冲，子息宫静，主子女各安其位、不聚于膝下；此条一路，只作倾向。</p>
+<p><strong>寿</strong>：只判长短，不判年岁——原书明言不能只凭四柱论亡殁之年。<span class="tag g2" title="两路同向，或三路中有一路方向相反已权衡、或有一路所据条目未定">倾向</span>本造丙火生午月、日坐羊刃，气厚不受克；所虑者在壬子一步，子午双冲日柱、又冲月令提纲（<span class="ev">R-SZ-028</span>／<span class="ev">R-MF-015</span>），为一大关口；过此则庚戌、辛亥尚可。<strong>本报告不书年岁。</strong></p>
+<p><strong>反证</strong></p>
+<p>妻一项，若实际早婚而无折，本判须降。降法不是辩解「自刑亦可解」，而是承认：若行运早逢金水（辛、亥），财星得地，则「星弱」一路失效，三路只剩两路，按门槛即当降为「倾向」。<strong>门槛不是装饰：三路才断，两路只倾向，一路只记。</strong></p>
+<h2 id="s11"><span class="no">⑨</span>大运走势</h2>
+<table>
+<tr><th>运次</th><th>干支</th><th>运干十神</th><th>五法与冲合</th></tr>
+<tr><td class="nw">1</td><td class="nw">丁巳</td><td class="nw">劫财</td><td class="l">无</td></tr>
+<tr><td class="nw">2</td><td class="nw">丙辰</td><td class="nw">比肩</td><td class="l">拱午／辰之中一字巳（R-SZ-030：主变动，不论吉凶）</td></tr>
+<tr><td class="nw">3</td><td class="nw">乙卯</td><td class="nw">正印</td><td class="l">入空亡（丙午旬空卯寅），减半吉凶</td></tr>
+<tr><td class="nw">4</td><td class="nw">甲寅</td><td class="nw">偏印</td><td class="l">入空亡（丙午旬空卯寅），减半吉凶</td></tr>
+<tr><td class="nw">5</td><td class="nw">癸丑</td><td class="nw">正官</td><td class="l">无</td></tr>
+<tr><td class="nw">6</td><td class="nw">壬子</td><td class="nw">七杀</td><td class="l">本入子为败亡，但四柱已带巳午，按 R-SZ-019 不忌；冲提（子冲月支午），本身无大碍，重在地支；<strong>双冲日柱</strong>——R-MF-015：「通常是财务、与是非之间」（非全面性之凶）</td></tr>
+<tr><td class="nw">7</td><td class="nw">辛亥</td><td class="nw">正财</td><td class="l">无</td></tr>
+<tr><td class="nw">8</td><td class="nw">庚戌</td><td class="nw">偏财</td><td class="l">无</td></tr>
+</table>
+<p>五法：十干败亡（<span class="ev">R-SZ-020</span>）／墓库（<span class="ev">R-SZ-021</span>～<span class="ev">023</span>，<strong>只限辰戌丑未月生人</strong>）／空亡（<span class="ev">R-SZ-025</span>）／接角（<span class="ev">R-SZ-026</span>）／冲提（<span class="ev">R-SZ-028</span>）。非四库月生人，墓库运直判不适用，不硬套。</p>
+<p>「夹」之取法原文未给，本包不判（查不出）。</p>
+<h2 id="s12"><span class="no">⑩</span>流年</h2>
+<table>
+<tr><th>年</th><th>流年</th><th>虚岁</th><th>所行大运</th><th>主命中（可断）</th><th>只记结构（不作断）</th></tr>
+<tr><td class="nw">2026</td><td class="nw">丙午</td><td class="nw">74</td><td class="nw">辛亥</td><td class="l">—</td><td class="l">伏吟、刑</td></tr>
+<tr><td class="nw">2027</td><td class="nw">丁未</td><td class="nw">75</td><td class="nw">辛亥</td><td class="l">三合三会、双六合</td><td class="l">—</td></tr>
+<tr><td class="nw">2028</td><td class="nw">戊申</td><td class="nw">76</td><td class="nw">辛亥</td><td class="l">—</td><td class="l">六合、刑</td></tr>
+<tr><td class="nw">2029</td><td class="nw">己酉</td><td class="nw">77</td><td class="nw">辛亥</td><td class="l">—</td><td class="l">六合</td></tr>
+<tr><td class="nw">2030</td><td class="nw">庚戌</td><td class="nw">78</td><td class="nw">庚戌</td><td class="l">岁运并临、架势</td><td class="l">冲柱</td></tr>
+</table>
+<p><strong>两档纪律</strong>：主命中方可断；刑、单冲、单合、伏吟、反吟只记结构。<span class="ev">R135</span>：流年不是每年都有事可断，一造至多散出二十年可用之流年——逐年充数即等于取消门槛。</p>
+<p>只到结构、不到应事：流年吉凶之轻重与应期先后，本器不排。</p>
+<h2 id="s13"><span class="no">⑪</span>人生建议</h2>
+<p><strong>一条主线</strong>：此造是羊刃驾杀之局，一生之关键不在「补火」而在「有制」。丙火生午月，日坐刃，火土成势；全局能制刃者，只时干壬水七杀一点（<span class="ev">R-SS-022</span>／<span class="ev">R243</span>）。故这一生之走向，取决于有没有把那股过盛的劲，导进一个有规矩、要担责、须对人负责的去处。</p>
+<p><span class="tag g1" title="三路以上独立来源同向，且所据条目无一落在未决／冲突开放项内">确断</span><strong>主线成立。</strong> 三路同向：格局一路（羊刃逆用，须反克之神，壬水在时干正当其任）、调候一路（丙日午月格值「壬庚」，<span class="ev">T-ORIG-TH01-029</span>）、刑冲一路（月日两午自刑，<span class="ev">T-X11-XJ02-012</span>，刃无制则内耗）。三路互不矛盾，故敢作定调。</p>
+<p><strong>三件要做对的事</strong></p>
+<p>一、<strong>护住壬水。</strong><span class="tag g1" title="三路以上独立来源同向，且所据条目无一落在未决／冲突开放项内">确断</span>壬为调候所取，又是制刃之神，一身系全局。金水为助，火土为耗。凡耗水之途——纯火土之业、昼夜颠倒、以口舌争胜——皆非所宜。此条非吉凶之说，是结构上的取舍：制神受克则格局落空，与吉凶无关。</p>
+<p>二、<strong>走技艺之路，不走资本之路。</strong><span class="tag g2" title="两路同向，或三路中有一路方向相反已权衡、或有一路所据条目未定">倾向</span>食伤五见而财星只一点，藏于年支巳中不透；巳为庚之长生，是财有源而财不显。财藏而食伤旺，是「能做出东西，不擅长变现」。故宜以技艺换财（任氏终身行医，正合此象），不宜囤积居奇、以本求利。此条两路来源（财星透藏、食伤生财），未及三路门槛，故作倾向。</p>
+<p>三、<strong>管住午午自刑。</strong><span class="tag g1" title="三路以上独立来源同向，且所据条目无一落在未决／冲突开放项内">确断</span>月日两午自刑（<span class="ev">T-X11-XJ02-012</span>），刃又在此，主内耗、急躁、与亲近之人反复。这一条不是吉凶，是性情上的漏口：刃在月日，则「不受管」与「自伤」是同一件事的两面，须以事上磨，不宜以忍压——压则积，积则发于亲近之人。</p>
+<p><strong>全局配合声明（硬要求）</strong></p>
+<p>本报告之主线，来自三路独立来源：格局（⑤，羊刃驾杀）、调候（⑥，壬庚）、刑冲（④，午午自刑），三路方向一致，故敢作定调。</p>
+<p><strong>存在一处矛盾</strong>：调候取壬庚，而扶抑一路本造不适用——夏月生人依 <span class="ev">R-SZ-016</span> 不论身强弱。若以扶抑硬套，会得「身旺宜泄」而与「护杀」相反之结论。此处从调候与格局，不从扶抑，理由是本造之病不在强弱而在「刃无制」，扶抑一路所问非所答。<strong>这一处须记住：不是两说都对，是本造不该用扶抑。</strong></p>
+<p><strong>另有一处未决</strong>：日主十干喜忌与调候孰先，F06 未裁（<span class="ev">references/merge/CONFLICT_MATRIX.md</span>）。本报告两说并列，不代定次序。</p>
+<h2 id="s14"><span class="no">⑫</span>学业</h2>
+<p><strong>读书之器，先看四样</strong>：印、食伤、文昌、华盖。四样摊开，本造之偏向很清楚。</p>
+<table>
+<tr><th>因子</th><th>本案实况</th><th>指向</th></tr>
+<tr><td class="l">印星（受学之器）</td><td class="l">正印乙木藏时支辰，不透；偏印不见</td><td class="l">不利章句之学</td></tr>
+<tr><td class="l">食伤（表达与巧思）</td><td class="l">食神三见、伤官二见，火土当令而旺</td><td class="l">长于技艺、短于记诵</td></tr>
+<tr><td class="l">文昌贵人</td><td class="l">丙日查申，原局无申——<strong>不见</strong></td><td class="l">考试一项无加持</td></tr>
+<tr><td class="l">华盖</td><td class="l">午支查戌，原局无戌——<strong>不见</strong></td><td class="l">不主孤高钻研</td></tr>
+<tr><td class="l">官星（科第之阶）</td><td class="l">正官癸透年干，被月干戊土合去</td><td class="l">仕途之门早闭</td></tr>
+</table>
+<p><span class="tag g1" title="三路以上独立来源同向，且所据条目无一落在未决／冲突开放项内">确断</span><strong>读书之器不利，而巧思有余。</strong> 三路同向：印不透、文昌不见、官被合去，三路皆指向「不以科第取胜」；而食伤五见，指向「以手艺、以实做出路」。这不是「读不好书」之断——原书无此说；是「读书之路不是他的主路」。</p>
+<p><span class="tag g2" title="两路同向，或三路中有一路方向相反已权衡、或有一路所据条目未定">倾向</span><strong>宜专门之学，不宜通才之途。</strong> 医、律、工、算一类，有确定的对象、可反复练手者，合其食伤；纯文、纯理论、须长年应试者不合。此条两路（食伤旺、官被合），未及三路，故作倾向。</p>
+<p><strong>读书运，逐运一句</strong>（起运虚岁 8）：</p>
+<ul><li>丁巳（8–17）、丙辰（18–27）：<span class="tag g1" title="三路以上独立来源同向，且所据条目无一落在未决／冲突开放项内">确断</span>火土加重，非问学之运。此二十年是「手上功夫长得快、纸上功夫长得慢」的时段。</li><li>乙卯（28–37）、甲寅（38–47）：<span class="tag g2" title="两路同向，或三路中有一路方向相反已权衡、或有一路所据条目未定">倾向</span>印星到位，而卯、寅俱为丙午旬之空亡（<span class="ev">R-SZ-025</span>，空亡减半吉凶）。印来而落空，是「有志于学而不得正途」之象——宜从师、宜专门、宜短训，不宜长年应试。</li><li>癸丑（48–57）：<span class="tag g3" title="仅一路来源，或所据条目 verification_status 非「已核」，只可写「或可」「待验」">存疑</span>官星透而印仍藏，或有「名分补至」之机，然癸水被戊土制，其力不厚。此条仅一路（官星），只可记，不可断。</li></ul>
+<p><strong>可执行四条</strong></p>
+<p>一、<strong>选一条手艺，学到底。</strong> 食伤旺者，最忌「什么都学一点」。选一条能反复练、有确定对错的路（医、律、工、算、匠），十年不出其二。</p>
+<p>二、<strong>拜师，不进考场。</strong> 印不透而文昌不见，考试是短处；师承是长项——梁氏「学前四条件」第一条即「会背刑冲合会」（<span class="ev">R02</span>），背是硬功，须有人逼。</p>
+<p>三、<strong>把「背功」单独立项。</strong> 食伤旺者惯于「懂了就算会」，而此造恰在「记诵」一项最弱。二十岁前若未补，此后逢考必吃亏。这是补短，不是改路。</p>
+<p>四、<strong>不承诺考运。</strong> 本造无文昌、印又藏，考试一项不作吉断——凡言「必中」「稳过」者，皆非本报告之说。</p>
+<p><strong>反证（此判何时不成立）</strong></p>
+<p>若此人实际早年即有科第之验（如二十岁前中式、或名校出身而一路顺遂），则本判须改。改法不是硬说「文昌暗藏」，而是承认：食伤旺者亦可由「表达」一路通关于考场——即所谓「会做不如会说」。此时读书之器之判，应让位于食伤一路；本报告之「不利章句」即当撤。<strong>判错要能改，才叫判。</strong></p>
+<h2 id="s15"><span class="no">⑬</span>事业</h2>
+<p><strong>职业基因，三样定盘</strong>：格局给方向，十神给方式，用神给环境。</p>
+<table>
+<tr><th>因子</th><th>本案实况</th><th>指向</th></tr>
+<tr><td class="nw">格局</td><td class="l">羊刃驾杀·逆用，制神壬水在时干</td><td class="l">宜「带杀之业」：需担责、有规矩、对人负责</td></tr>
+<tr><td class="nw">十神</td><td class="l">食神三见制杀（戊土克壬），制杀太过</td><td class="l">本事有，舞台常小；宜自立，不宜久居人下</td></tr>
+<tr><td class="nw">用神</td><td class="l">调候取壬庚（金水）</td><td class="l">环境宜「有约束、有流动」，忌纯火土之燥</td></tr>
+<tr><td class="nw">神煞</td><td class="l">将星见（<span class="ev">JS-SS-04-112</span>）、羊刃见</td><td class="l">主统领、主锋芒；合伙则争</td></tr>
+<tr><td class="nw">官星</td><td class="l">正官癸被戊合去，仕途门闭</td><td class="l">不走科层晋升之路</td></tr>
+</table>
+<p><span class="tag g1" title="三路以上独立来源同向，且所据条目无一落在未决／冲突开放项内">确断</span><strong>宜「带规矩的技艺之业」，忌「纯商」与「纯文」。</strong> 三路同向：格局要制（须有规矩）、食伤旺（须动手）、官被合（不宜科层）。医、法、军、匠、教五类，皆合此象——任氏行医，正是其中一类。</p>
+<p><span class="tag g2" title="两路同向，或三路中有一路方向相反已权衡、或有一路所据条目未定">倾向</span><strong>宜自立门户，不宜久居人下。</strong> 刃在月日，主人不受管；将星又见，主「宁为鸡首」。此条两路（刃、将星），未及三路。若在大机构，则宜取「技术负责」而非「行政负责」之位——同是担责，一在事、一在人，此造宜在事。</p>
+<p><span class="tag g3" title="仅一路来源，或所据条目 verification_status 非「已核」，只可写「或可」「待验」">存疑</span><strong>「制杀太过」一层，只可记。</strong> 月干戊土食神克壬水七杀，是制神受制。原书于「制杀太过」之轻重未给字数式，本器亦未落算。故此一层只作「舞台常小于本事」之记，不作「必受压制」之断。</p>
+<p><strong>时间线（按大运，起运虚岁 8）</strong></p>
+<table>
+<tr><th>运</th><th>虚岁</th><th>通行之事</th><th>强度</th></tr>
+<tr><td class="nw">丁巳</td><td class="nw">8–17</td><td class="l">火土助刃，读书运弱；手上功夫起</td><td class="nw"><span class="tag g2" title="两路同向，或三路中有一路方向相反已权衡、或有一路所据条目未定">倾向</span></td></tr>
+<tr><td class="nw">丙辰</td><td class="nw">18–27</td><td class="l">比肩帮身，辰为水库（壬之根）；入行、拜师之期</td><td class="nw"><span class="tag g2" title="两路同向，或三路中有一路方向相反已权衡、或有一路所据条目未定">倾向</span></td></tr>
+<tr><td class="nw">乙卯</td><td class="nw">28–37</td><td class="l">印到而落空亡；宜专门、宜短训，不宜应试</td><td class="nw"><span class="tag g1" title="三路以上独立来源同向，且所据条目无一落在未决／冲突开放项内">确断</span></td></tr>
+<tr><td class="nw">甲寅</td><td class="nw">38–47</td><td class="l">同上；寅为丙之长生，气旺，可自立</td><td class="nw"><span class="tag g2" title="两路同向，或三路中有一路方向相反已权衡、或有一路所据条目未定">倾向</span></td></tr>
+<tr><td class="nw">癸丑</td><td class="nw">48–57</td><td class="l">官星透，名分之事或至；丑为金库，财根渐生</td><td class="nw"><span class="tag g3" title="仅一路来源，或所据条目 verification_status 非「已核」，只可写「或可」「待验」">存疑</span></td></tr>
+<tr><td class="nw">壬子</td><td class="nw">58–67</td><td class="l"><strong>双冲日柱</strong>（<span class="ev">R-MF-015</span>：财务与是非之间）；冲提；本入子为败亡，然四柱带巳午，依 <span class="ev">R-SZ-019</span> 不忌</td><td class="nw"><span class="tag g1" title="三路以上独立来源同向，且所据条目无一落在未决／冲突开放项内">确断</span></td></tr>
+<tr><td class="nw">辛亥</td><td class="nw">68–77</td><td class="l">辛为正财、亥为壬之禄，金水得地，晚运转润</td><td class="nw"><span class="tag g2" title="两路同向，或三路中有一路方向相反已权衡、或有一路所据条目未定">倾向</span></td></tr>
+<tr><td class="nw">庚戌</td><td class="nw">78–87</td><td class="l">庚为偏财、戌为火库；库地宜守不宜进</td><td class="nw"><span class="tag g3" title="仅一路来源，或所据条目 verification_status 非「已核」，只可写「或可」「待验」">存疑</span></td></tr>
+</table>
+<p><strong>可执行四条</strong></p>
+<p>一、<strong>择业三个排除项</strong>：不选须长年应试晋升者（官被合）、不选以资本周转为本者（财藏不透）、不选纯火土之业（耗制神）。三项之外，皆可谈。</p>
+<p>二、<strong>取「技术负责」之位，不取「行政负责」之位。</strong> 同是担责，此造担「事」则刃有所用，担「人」则刃无所施而转成内耗（午午自刑）。</p>
+<p>三、<strong>不与人合伙争利。</strong><span class="tag g2" title="两路同向，或三路中有一路方向相反已权衡、或有一路所据条目未定">倾向</span>比肩一、劫财二，刃又在宫，合伙则财务是非起。壬子运双冲日柱（<span class="ev">R-MF-015</span>），即应此象。若必合伙，须以「一方专技、一方专营」为界，不可两权并列。</p>
+<p>四、<strong>五十八岁后收，不放。</strong> 壬子一步是关口，不在凶吉，在「此时若大动，则冲提冲日一齐发动」。此运宜守成、宜转换而非扩张。</p>
+<p><strong>反证</strong></p>
+<p>若此人在三十至五十岁间即已自立门户且规模不小，则「舞台小」之判须让位——盖「制杀太过」之象，本可因行运补金水而解。此时应改判为「制杀得宜」，本报告之「倾向」即当升为「确断」，惟方向由「受制」改为「有度」。<strong>同一结构，行运不同，断语相反，这是正常的；不肯改的断，才是死的。</strong></p>
+<h2 id="s16"><span class="no">⑭</span>财富</h2>
+<p><strong>财富之器，看四样</strong>：财星透藏、食伤能否生财、比劫是否夺财、财之根气。</p>
+<table>
+<tr><th>因子</th><th>本案实况</th><th>指向</th></tr>
+<tr><td class="nw">财星透藏</td><td class="l">偏财庚一点，藏年支巳，不透</td><td class="l">财有源而不显</td></tr>
+<tr><td class="nw">根气</td><td class="l">巳为庚之长生</td><td class="l">有本可生，非无根之财</td></tr>
+<tr><td class="nw">食伤生财</td><td class="l">食神三、伤官二，火土燥而金泄不出</td><td class="l">有生意，缺变现之渠</td></tr>
+<tr><td class="nw">比劫夺财</td><td class="l">比肩一、劫财二</td><td class="l">分财者众，忌合伙</td></tr>
+<tr><td class="nw">调候护财</td><td class="l">丙日午月取壬庚；壬透时干</td><td class="l">制神在，财不被劫尽</td></tr>
+</table>
+<p><span class="tag g1" title="三路以上独立来源同向，且所据条目无一落在未决／冲突开放项内">确断</span><strong>技艺换财，不是资本生财。</strong> 三路同向：财藏不透（不能靠资产生利）、食伤旺（能做出东西）、比劫重（一囤积就被分）。任氏终身行医，以诊金为入，正是此象——不做囤积，只做手艺。</p>
+<p><span class="tag g1" title="三路以上独立来源同向，且所据条目无一落在未决／冲突开放项内">确断</span><strong>能守，不能暴发。</strong> 财藏于长生之地，是有源之水：不至枯，亦不成洪。凡言「某年大发」者，与此象不合。</p>
+<p><span class="tag g2" title="两路同向，或三路中有一路方向相反已权衡、或有一路所据条目未定">倾向</span><strong>合伙则财散。</strong> 比劫三见、刃在宫，主分利之争。此条两路（比劫、羊刃），未及三路，故作倾向；然与第十一节第三条同向，可并看。</p>
+<p><strong>各阶段状态</strong></p>
+<table>
+<tr><th>运</th><th>虚岁</th><th>财之状态</th><th>强度</th></tr>
+<tr><td class="nw">丁巳、丙辰</td><td class="nw">8–27</td><td class="l">火土当令，财被耗；此二十年是「挣本事」不是「挣钱」</td><td class="nw"><span class="tag g2" title="两路同向，或三路中有一路方向相反已权衡、或有一路所据条目未定">倾向</span></td></tr>
+<tr><td class="nw">乙卯、甲寅</td><td class="nw">28–47</td><td class="l">印旺生身，食伤受制；收入随名而至，非随商而至</td><td class="nw"><span class="tag g2" title="两路同向，或三路中有一路方向相反已权衡、或有一路所据条目未定">倾向</span></td></tr>
+<tr><td class="nw">癸丑</td><td class="nw">48–57</td><td class="l">丑为金库，财根始生；官星透，名分之财</td><td class="nw"><span class="tag g3" title="仅一路来源，或所据条目 verification_status 非「已核」，只可写「或可」「待验」">存疑</span></td></tr>
+<tr><td class="nw">壬子</td><td class="nw">58–67</td><td class="l">双冲日柱（<span class="ev">R-MF-015</span>：财务与是非之间）；水旺克火，财与身俱动</td><td class="nw"><span class="tag g1" title="三路以上独立来源同向，且所据条目无一落在未决／冲突开放项内">确断</span></td></tr>
+<tr><td class="nw">辛亥</td><td class="nw">68–77</td><td class="l">辛为正财透、亥为壬禄，金水得地，是财最顺之运</td><td class="nw"><span class="tag g2" title="两路同向，或三路中有一路方向相反已权衡、或有一路所据条目未定">倾向</span></td></tr>
+</table>
+<p><strong>可执行四条</strong></p>
+<p>一、<strong>以「单价×手艺」为收入模型，不以「本钱×周转」为模型。</strong> 财藏不透者，凡涉囤积、涉杠杆、涉替人担保，皆非所宜。</p>
+<p>二、<strong>不合伙，或合伙必分权。</strong> 若必合伙，须「一方专技、一方专营」；两权并列则争，争则在壬子运（58–67）显。</p>
+<p>三、<strong>置业宜「用」不宜「炒」。</strong> 财有根而不显，置产自住则安，转手图利则与比劫争——此条为通例引申，原书无明文，故不标证据等级。</p>
+<p>四、<strong>五十八岁后守财，不增财。</strong> 壬子双冲，是财务与是非同起之运；此运宜收不宜张。</p>
+<p><strong>反证</strong></p>
+<p>若此人在四十岁前即有大额资本性收益（如置产转售、股权增值），则「不能暴发」之判须改。改法：承认原局财虽藏，而大运若逢金水（辛、亥、丑），财根可透；此时应改判为「晚发之财」，本报告之「确断」降为「倾向」。<strong>本判所据是原局，未及行运之补；行运既补，判即当改。</strong></p>
+<h2 id="s17"><span class="no">⑮</span>人际</h2>
+<p>第八节判的是「是什么」，本节说「怎么办」。二者所据同一，所答不同：前者是结构，后者是取舍。</p>
+<h3>择偶与相处</h3>
+<p><span class="tag g1" title="三路以上独立来源同向，且所据条目无一落在未决／冲突开放项内">确断</span><strong>宜迟婚，且宜「先共事、后共居」。</strong> 据第八节三路（财藏不透、妻宫坐刃自刑、壬子双冲），本造于亲密关系中最易犯的错，是「以刃对人」——午午自刑，主与亲近之人反复。先共事一段，是让刃先在事上磨过，再进到生活里；不共事而遽同居，则刃无所施，全落在人身上。</p>
+<p><span class="tag g2" title="两路同向，或三路中有一路方向相反已权衡、或有一路所据条目未定">倾向</span><strong>宜取「性子缓、能容事」之人。</strong> 此条非命理定则，是由「宫刃自刑」推出的相处条件：宫内既刚，则对方宜柔；若两刚相值，自刑即由内耗转为对耗。<strong>此为引申，原书无明文，故不标证据等级。</strong></p>
+<p><strong>具体三条</strong>：一、议婚之前，先看「争执之后如何收场」——刃在宫者，收场比开端重要。二、婚后不与长辈同住一处（宫既自刑，再加一层人事，则内耗无出口）；此条为通例引申。三、壬子运（58–67）双冲日柱，此十年婚姻之事宜静，不宜以「重新开始」为解决。</p>
+<h3>与父母</h3>
+<p><span class="tag g2" title="两路同向，或三路中有一路方向相反已权衡、或有一路所据条目未定">倾向</span><strong>与父：早年不由己，中年以后可自主。</strong> 父星藏而不透，年月癸戊相合，是早年家中之事多由他人定；四十岁后印星到位（乙卯、甲寅），自主之力渐生。</p>
+<p><span class="tag g2" title="两路同向，或三路中有一路方向相反已权衡、或有一路所据条目未定">倾向</span><strong>与母：缘在后，力在中。</strong> 印藏时柱，母缘不早显；然印为受学之器，中年后凡「从师、受教、依赖长辈之力」之事，多应在此。</p>
+<p><strong>具体两条</strong>：一、早年的家事不必强争，争亦无益（星不显，争无着力处）。二、中年后若有长辈提携，宜受不宜却——印在时柱，正是「后至之力」。</p>
+<h3>与子女</h3>
+<p><span class="tag g1" title="三路以上独立来源同向，且所据条目无一落在未决／冲突开放项内">确断</span><strong>子星透而有用，宜「给规矩、不给路径」。</strong> 七杀为子，透时干而受戊土食神制——子星本身有力，然「制」在其上，主此造对子女易取「管」的姿态。梁氏于男命以官杀为子，杀主严；此造食神制杀，是「严而能收」。</p>
+<p><strong>具体两条</strong>：一、教子女以「事上练」，不以「话上教」——食伤旺者，说得多、做得少，是此造最容易犯的毛病，于子女尤显。二、子女宫静（辰与巳无合无冲），主各安其位，不必强聚。</p>
+<h3>社交</h3>
+<p><span class="tag g2" title="两路同向，或三路中有一路方向相反已权衡、或有一路所据条目未定">倾向</span><strong>寡合，宜「少而深」。</strong> 四柱无六合、无三合，唯自刑一处；将星见、羊刃在宫，主「与人共事则能，与人周旋则倦」。此条两路，只作倾向。</p>
+<p><strong>具体三条</strong>：一、以「共事」交友，不以「应酬」交友——将星主统领，共事则位自定。二、不结「三方合伙」之局（比劫三见，三方必争）。三、壬子运（58–67）人事易起是非（<span class="ev">R-MF-015</span>），此运宜减交、不宜增交。</p>
+<p><strong>反证</strong></p>
+<p>本节所给，皆为「由结构推出的取舍」，不是「命定之性格」。若此人实际人情练达、婚姻顺遂，则本节之「寡合」「宜迟婚」须改——改法在第八节：先看三路是否仍成立，再看行运是否已解。<strong>结构给的是「倾向何处」，不是「必往何处」；把倾向说成命定，就是以命理僭人事。</strong></p>
+<h2 id="s18"><span class="no">⑯</span>健康</h2>
+<p>本节只言「偏热／偏寒／偏燥／偏湿」与「须注意」，<strong>不做疾病诊断</strong>——原书：「有显明之症兆，才批出断句」。本造无显明症兆者，不批。</p>
+<table>
+<tr><th>检查</th><th>本案</th><th>说明</th></tr>
+<tr><td class="nw">五行偏枯</td><td class="l">火 4、土 5、水 3、金 1、木 1</td><td class="l">火土偏重，金木偏轻</td></tr>
+<tr><td class="nw">调候燥湿</td><td class="l">午月生，火土当令，全局无水之根（壬坐辰，辰为水库，稍解）</td><td class="l"><strong>偏燥</strong></td></tr>
+<tr><td class="nw">刑冲部位</td><td class="l">月日两午自刑</td><td class="l">部位在「中段」（胸腹之间）</td></tr>
+<tr><td class="nw">日主受克</td><td class="l">丙火生午月，气厚不受克</td><td class="l">本元不弱</td></tr>
+<tr><td class="nw">制神状态</td><td class="l">壬水七杀透而受戊土制</td><td class="l">水气不畅</td></tr>
+</table>
+<p><span class="tag g2" title="两路同向，或三路中有一路方向相反已权衡、或有一路所据条目未定">倾向</span><strong>体质偏燥，须注意「上炎」一类。</strong> 三路同向：火土重（五行）、夏月燥（调候）、午午自刑（部位）。措辞止于「偏燥」「须注意」，不出病名。</p>
+<p><span class="tag g2" title="两路同向，或三路中有一路方向相反已权衡、或有一路所据条目未定">倾向</span><strong>金木偏轻，主「收敛」与「疏泄」两端偏弱。</strong> 金一点藏巳、木一点藏辰，皆不透。此为结构描述，非病症判断。</p>
+<p><span class="tag g3" title="仅一路来源，或所据条目 verification_status 非「已核」，只可写「或可」「待验」">存疑</span><strong>壬水受制一层，只可记。</strong> 水主下行，制神受克则水气不畅——然此为推理，非原书明文，且无显明症兆可对。故只记，不断。</p>
+<p><strong>可执行三条</strong></p>
+<p>一、<strong>饮食取「润」不取「燥」。</strong> 偏燥之体，忌辛燥炙烤；此条为通例，非原书明文。</p>
+<p>二、<strong>夜不入子时之劳。</strong> 壬水为制神，子时为水旺之时；此造水弱，熬夜即耗制神，与第十一节「护住壬水」同一条。</p>
+<p>三、<strong>不以外症自断。</strong> 本报告不出病名、不指脏腑、不代医诊。凡身体有疑，先就医，不以命理代诊——<strong>这不是免责话，是原书的分寸。</strong></p>
+<p><strong>依据</strong>：五行计数为 E6 结构计算；燥湿取 <span class="ev">TAB-LXR-TH-01-ORIG</span>（丙日午月格值「壬庚」）；自刑落点 <span class="ev">T-X11-XJ02-012</span>。<strong>病名不出，故无病名类证据可挂</strong>——这不是漏挂，是本节的分寸。</p>
+<p><strong>反证</strong></p>
+<p>若此人素来体健、并无燥热之扰，则「偏燥」之判须让位。理由是：调候所论是「气」，不是「病」；气偏而体不病者，本属常见。此时本报告应改为「气偏燥而体未应」，不作「须注意」之提示。<strong>结构偏，不等于人必病；这一层若混，即以命理僭医。</strong></p>
+<h2 id="s19"><span class="no">⑰</span>年度行动指南</h2>
+<p>本节只作结构提示，<strong>不排月</strong>；逐年细批须另立流年书。</p>
+<table>
+<tr><th>年</th><th>流年</th><th>虚岁</th><th>所行大运</th><th>结构</th><th>一句</th></tr>
+<tr><td class="nw">2026</td><td class="nw">丙午</td><td class="nw">74</td><td class="nw">辛亥</td><td class="l">伏吟、自刑</td><td class="l"><span class="tag g2" title="两路同向，或三路中有一路方向相反已权衡、或有一路所据条目未定">倾向</span><strong>伏吟之年，宜守。</strong> 丙午与日柱同，午又叠自刑——不是凶年，是「旧事重来」之年：往年的结、旧人的事，会回来说话。宜了结，不宜新开。</td></tr>
+<tr><td class="nw">2027</td><td class="nw">丁未</td><td class="nw">75</td><td class="nw">辛亥</td><td class="l">三合三会、双六合</td><td class="l"><span class="tag g2" title="两路同向，或三路中有一路方向相反已权衡、或有一路所据条目未定">倾向</span><strong>合多之年，事易成亦易变。</strong> 午未合、丁壬合，合则人缘至；然合多则「先合后冲」之机亦伏（梁氏：先合后冲，每到事成变卦）。事可谈，约宜简。</td></tr>
+<tr><td class="nw">2028</td><td class="nw">戊申</td><td class="nw">76</td><td class="nw">辛亥</td><td class="l">六合、刑</td><td class="l"><span class="tag g2" title="两路同向，或三路中有一路方向相反已权衡、或有一路所据条目未定">倾向</span><strong>申为壬之长生，水得地。</strong> 制神得生，是本年最可借力之处；然申与巳合、与寅刑，合作之事宜防反复。</td></tr>
+<tr><td class="nw">2029</td><td class="nw">己酉</td><td class="nw">77</td><td class="nw">辛亥</td><td class="l">未入算</td><td class="l"><span class="tag g3" title="仅一路来源，或所据条目 verification_status 非「已核」，只可写「或可」「待验」">存疑</span>须另跑 <span class="ev">--liunian 2029</span> 入算，本节不臆填。</td></tr>
+<tr><td class="nw">2030</td><td class="nw">庚戌</td><td class="nw">78</td><td class="nw">庚戌</td><td class="l">未入算（换运之年）</td><td class="l"><span class="tag g3" title="仅一路来源，或所据条目 verification_status 非「已核」，只可写「或可」「待验」">存疑</span>庚戌为第八步大运之始，<strong>换运之年最宜静</strong>；具体结构须另跑。</td></tr>
+</table>
+<p><strong>两档纪律</strong>：主命中方可断；刑、单冲、单合、伏吟、反吟只记结构。<span class="ev">R135</span>：流年不是每年都有事可断，一造至多散出二十年可用之流年——逐年充数即等于取消门槛。</p>
+<p><strong>未入算者写明未入算</strong>，不拿通书补。这是本报告与「每年都说几句」的分别。</p>
+<h2 id="s20"><span class="no">⑱</span>风险与禁忌</h2>
+<table>
+<tr><th>检查项</th><th>本案</th><th>判据</th><th>依据</th></tr>
+<tr><td class="nw">天罗地网</td><td class="nw">见</td><td class="l">四支见辰戌／戌亥／辰巳</td><td class="l"><span class="ev">R36</span>、<span class="ev">R-SZ-044</span></td></tr>
+<tr><td class="nw">墓库运</td><td class="nw">不适用</td><td class="l">月支午非辰戌丑未，依原书墓库运只限四库月生人</td><td class="l"><span class="ev">R20</span>、<span class="ev">R-SZ-021</span></td></tr>
+<tr><td class="nw">冲提运</td><td class="nw">见（壬子）</td><td class="l">运支冲月支为冲提</td><td class="l"><span class="ev">R-SZ-028</span>、<span class="ev">R-MF-014</span></td></tr>
+<tr><td class="nw">拱合冲边</td><td class="nw">须人工核</td><td class="l">拱夹之成立与否看 <span class="ev">R52</span>／<span class="ev">R53</span>（拱之条件、暗拱逢冲为大忌），程序只列条件不代判</td><td class="l"><span class="ev">R52</span>、<span class="ev">R53</span></td></tr>
+</table>
+<p><span class="tag g1" title="三路以上独立来源同向，且所据条目无一落在未决／冲突开放项内">确断</span><strong>四项之中，实犯两项，一项不适用，一项待核。</strong> 天罗地网见（辰巳），冲提见（壬子），墓库不适用（非四库月），拱合冲边须人工核。<strong>「不适用」照写，不硬凑</strong>——非四库月而套墓库运，是批命最常见的套法错误。</p>
+<p><span class="tag g2" title="两路同向，或三路中有一路方向相反已权衡、或有一路所据条目未定">倾向</span><strong>壬子一步是全局唯一的「合力关口」。</strong> 该运同时犯冲提（子冲午）与双冲日柱，两冲并起。此条虽只一路（冲），然冲之结构确定，故晋为倾向而非存疑。</p>
+<p><strong>须避之事（五条）</strong></p>
+<p>一、<strong>忌以合伙争利。</strong> 比劫三见、刃在宫（见⑭）；壬子运（58–67）尤显。</p>
+<p>二、<strong>忌在壬子运大动。</strong> 冲提冲日并起之年，宜守成、宜转换，不宜扩张（见⑬时间线）。</p>
+<p>三、<strong>忌纯火土之业与昼夜颠倒。</strong> 制神壬水受戊土制，耗水之途即耗全局枢机（见⑪）。</p>
+<p>四、<strong>忌以命理代医、代法、代决。</strong> 本节所列为结构风险，非预言；原书分寸是「七成应验即合理合宜」。</p>
+<p>五、<strong>忌在流年伏吟之年新开局。</strong> 2026 丙午伏吟（见⑰），宜了结不宜新开。</p>
+<p><strong>不得写成「必然发生」。</strong> 本节列的是结构风险与须避之事，不是预言；原局无此结构者写「不犯」，不硬凑。</p>
+<h2 id="s21"><span class="no">⑲</span>总纲</h2>
+<p>本造丙火生午月，日坐羊刃，火土成势；全局一点壬水七杀透于时干，既是调候所取，又是制刃之神——<strong>一身之枢机，全在这一水里</strong>。故这一生大体怎么走，可一言蔽之：<strong>有成器之质，须有约束之器；得其制则刃为用，失其制则刃自伤。</strong></p>
+<p>前半生（丁巳至甲寅，8–47）火土助刃、印星落空，是「手上功夫长得快、纸上功名来得慢」的二十年；宜专门、宜师承、不宜应试。中年（癸丑，48–57）官星一透，名分之事或至，然力不厚，只可记。晚运（壬子，58–67）双冲并起，是财务与是非同来的一步——<strong>不是灾，是关</strong>；过此则辛亥金水得地，是全局最顺之十年，财与身俱安。</p>
+<p><span class="tag g1" title="三路以上独立来源同向，且所据条目无一落在未决／冲突开放项内">确断</span><strong>格局已成，主线清楚。</strong> 三路（格局、调候、刑冲）同向，故敢收束为一句：走技艺之路、取有规矩之位、护住那一点水，则此造可成器。</p>
+<p><span class="tag g2" title="两路同向，或三路中有一路方向相反已权衡、或有一路所据条目未定">倾向</span><strong>制神偏弱，是此造一生的「欠一分」。</strong> 本事常有，舞台常小；非不能，是常被琐务拖住。此一分，行运可补而不能尽补。</p>
+<p><strong>分寸语</strong>：以上所批，能有个七成应验，就算合理合宜。<strong>切忌以包准自居</strong>——原书之戒，亦是本包之戒：凡断语皆有其依据与限度，限度已写在附一；读者若见某处与实况不合，先看附一，再看该节所据条目，然后改判。<strong>判能改，才算判；不能改的，是口号。</strong></p>
+<h2 id="s22" class="app">存疑与反证</h2>
+<p>本节由 <span class="ev">python tools/report_gen.py --audit 本文件 --write</span> 重算。<strong>报告里最该看的不是结论，是这一节</strong>：它写明哪几节证据最薄、哪些判断只到「倾向／存疑」、哪些结论牵涉未决条目、与通行说法何处不同。读者凭此可分辨哪句硬、哪句软。</p>
+<h3>一、证据强度分布</h3>
+<table>
+<tr><th>板</th><th>标题</th><th>证据</th><th>正文字数</th><th>确断</th><th>倾向</th><th>存疑</th><th>未决项</th></tr>
+<tr><td class="nw">①</td><td class="l">基本信息（结构）</td><td class="nw">7</td><td class="nw">285</td><td class="nw">0</td><td class="nw">0</td><td class="nw">0</td><td class="nw">0</td></tr>
+<tr><td class="nw">②</td><td class="l">四柱排盘（结构）</td><td class="nw">1</td><td class="nw">426</td><td class="nw">0</td><td class="nw">0</td><td class="nw">0</td><td class="nw">0</td></tr>
+<tr><td class="nw">③</td><td class="l">五行十神（结构）</td><td class="nw">1</td><td class="nw">232</td><td class="nw">0</td><td class="nw">0</td><td class="nw">0</td><td class="nw">0</td></tr>
+<tr><td class="nw">④</td><td class="l">刑冲合会与神煞（结构）</td><td class="nw">41</td><td class="nw">1998</td><td class="nw">0</td><td class="nw">0</td><td class="nw">0</td><td class="nw">0</td></tr>
+<tr><td class="nw">⑤</td><td class="l">格局分析（结构）</td><td class="nw">11</td><td class="nw">400</td><td class="nw">0</td><td class="nw">0</td><td class="nw">0</td><td class="nw">0</td></tr>
+<tr><td class="nw">⑥</td><td class="l">日主调候（结构）</td><td class="nw">1</td><td class="nw">190</td><td class="nw">0</td><td class="nw">0</td><td class="nw">0</td><td class="nw">0</td></tr>
+<tr><td class="nw">⑦</td><td class="l">用神全景（结构）</td><td class="nw">7</td><td class="nw">462</td><td class="nw">0</td><td class="nw">0</td><td class="nw">0</td><td class="nw">0</td></tr>
+<tr><td class="nw">⑧</td><td class="l">六亲专题</td><td class="nw">4</td><td class="nw">1071</td><td class="nw">6</td><td class="nw">7</td><td class="nw">0</td><td class="nw">0</td></tr>
+<tr><td class="nw">⑨</td><td class="l">大运走势（结构）</td><td class="nw">8</td><td class="nw">415</td><td class="nw">0</td><td class="nw">0</td><td class="nw">0</td><td class="nw">0</td></tr>
+<tr><td class="nw">⑩</td><td class="l">流年（结构）</td><td class="nw">1</td><td class="nw">287</td><td class="nw">0</td><td class="nw">0</td><td class="nw">0</td><td class="nw">0</td></tr>
+<tr><td class="nw">⑪</td><td class="l">人生建议</td><td class="nw">5</td><td class="nw">963</td><td class="nw">3</td><td class="nw">1</td><td class="nw">0</td><td class="nw">0</td></tr>
+<tr><td class="nw">⑫</td><td class="l">学业</td><td class="nw">2</td><td class="nw">1103</td><td class="nw">2</td><td class="nw">2</td><td class="nw">1</td><td class="nw">0</td></tr>
+<tr><td class="nw">⑬</td><td class="l">事业</td><td class="nw">3</td><td class="nw">1348</td><td class="nw">3</td><td class="nw">6</td><td class="nw">3</td><td class="nw">0</td></tr>
+<tr><td class="nw">⑭</td><td class="l">财富</td><td class="nw">1</td><td class="nw">1029</td><td class="nw">3</td><td class="nw">4</td><td class="nw">1</td><td class="nw">0</td></tr>
+<tr><td class="nw">⑮</td><td class="l">人际</td><td class="nw">1</td><td class="nw">1138</td><td class="nw">2</td><td class="nw">4</td><td class="nw">0</td><td class="nw">0</td></tr>
+<tr><td class="nw">⑯</td><td class="l">健康</td><td class="nw">2</td><td class="nw">833</td><td class="nw">0</td><td class="nw">2</td><td class="nw">1</td><td class="nw">0</td></tr>
+<tr><td class="nw">⑰</td><td class="l">年度行动指南</td><td class="nw">1</td><td class="nw">577</td><td class="nw">0</td><td class="nw">3</td><td class="nw">2</td><td class="nw">0</td></tr>
+<tr><td class="nw">⑱</td><td class="l">风险与禁忌</td><td class="nw">8</td><td class="nw">694</td><td class="nw">1</td><td class="nw">1</td><td class="nw">0</td><td class="nw">0</td></tr>
+<tr><td class="nw">⑲</td><td class="l">总纲</td><td class="nw">0</td><td class="nw">531</td><td class="nw">1</td><td class="nw">1</td><td class="nw">0</td><td class="nw">0</td></tr>
+</table>
+<p><strong>读法</strong>：<span class="ev">证据</span> 为本章去重的 rule_id／cell_id 条数；<span class="ev">确断／倾向／存疑</span> 为本章判断的强度分布（口径见卷首第三节）。证据少而确断多，是可疑的——那说明断语跑在依据前面。</p>
+<h3>二、本案最薄三处</h3>
+<p><strong>只从「判断节」中选</strong>：标「结构」者（四柱、表值、见否）本不需大量规则背书，证据少属正常；⑲ 总纲为收束节，其证据挂在前节，不重复计。二者皆不列此榜。按「证据条数÷判断数」低者优先、存疑多者次之，得出<strong>⑭ 财富（证据 1 条、存疑 1 处）、⑮ 人际（证据 1 条、存疑 0 处）、⑰ 年度行动指南（证据 1 条、存疑 2 处）</strong>。这三处若被追问，本件答不满，须补料或降为「倾向」。</p>
+<h3>三、与通行说法不同处（本包定则，非疏漏）</h3>
+<table>
+<tr><th>事</th><th>通行说法</th><th>本包所据</th><th>理由</th></tr>
+<tr><td class="nw">华盖起法</td><td class="l">「仅年支起算，日支不参与」</td><td class="l"><span class="ev">JS-SS-04</span> 表头「日柱地支」</td><td class="l">《子平基础概要》神煞例表（四）表头明写「日柱地支」，以书为准</td></tr>
+<tr><td class="nw">神煞吉凶</td><td class="l">「某煞主凶」</td><td class="l">只报见／不见</td><td class="l"><span class="ev">R-MF-044</span>～<span class="ev">046</span> 与 p027 命名说两存，不代裁</td></tr>
+<tr><td class="nw">调候主次</td><td class="l">「第一用神、第二用神」</td><td class="l">只列候选，不排主次</td><td class="l">原表未分主次，分了就是替梁氏作主</td></tr>
+<tr><td class="nw">身强弱</td><td class="l">打分量化</td><td class="l">等权计数，不作加权</td><td class="l">梁氏不以数字量化强弱（<span class="ev">R01</span>）</td></tr>
+</table>
+<h3>四、须补何料方能定案</h3>
+<table>
+<tr><th>缺料</th><th>补后能定什么</th></tr>
+<tr><td class="nw">出生经度</td><td class="l">真太阳时校正后重排；若时辰临界，年日时三柱可能全变，本件须重批</td></tr>
+<tr><td class="nw">流月材料</td><td class="l">应期可从年降到月</td></tr>
+</table>
+<h2 id="s23" class="app">证据索引</h2>
+<p>全文去重：规则 54 条、表值 24 条，合计 72 条；另有 6 处表号／通配前缀（非格值），不计入。</p>
+<table>
+<tr><th>编号</th><th>主题</th><th>来源</th><th>定位</th><th>等级</th></tr>
+<tr><td class="l"><span class="ev">R-JC-01</span></td><td class="l">合会·拱夹定义（拱三合／拱隔位）</td><td class="l">《子平基础概要》梁湘润（简体排印本 216 页，页锚转录稿）</td><td class="l">JC:p154</td><td class="nw">E3·部分核</td></tr>
+<tr><td class="l"><span class="ev">R-MF-014</span></td><td class="l">母法·大运/双冲月柱为最忌（冲提）</td><td class="l">《子平母法—大流年判例》梁湘润（简体排印本 457 页）</td><td class="l">MF:p229</td><td class="nw">E3·部分核</td></tr>
+<tr><td class="l"><span class="ev">R-MF-015</span></td><td class="l">母法·大运/双冲月柱与日柱之吉凶范围</td><td class="l">《子平母法—大流年判例》梁湘润（简体排印本 457 页）</td><td class="l">MF:p229</td><td class="nw">E3·部分核</td></tr>
+<tr><td class="l"><span class="ev">R-MF-044</span></td><td class="l">母法·神煞断法/寡宿华盖只主家庭夫妻不和</td><td class="l">《子平母法—大流年判例》梁湘润（简体排印本 457 页）</td><td class="l">MF:p218</td><td class="nw">E3·部分核</td></tr>
+<tr><td class="l"><span class="ev">R-SP-001</span></td><td class="l">神煞·天火杀/火灾起例</td><td class="l">《神煞探源》梁湘润（附协纪辨方提要，Word 录入稿）</td><td class="l">SP:s18</td><td class="nw">E3·部分核</td></tr>
+<tr><td class="l"><span class="ev">R-SP-005</span></td><td class="l">神煞·天刑杀/体弱多病</td><td class="l">《神煞探源》梁湘润（附协纪辨方提要，Word 录入稿）</td><td class="l">SP:s21</td><td class="nw">E3·部分核</td></tr>
+<tr><td class="l"><span class="ev">R-SP-007</span></td><td class="l">神煞·雷霆杀/猝然临难</td><td class="l">《神煞探源》梁湘润（附协纪辨方提要，Word 录入稿）</td><td class="l">SP:s22</td><td class="nw">E3·部分核</td></tr>
+<tr><td class="l"><span class="ev">R-SP-014</span></td><td class="l">神煞·咸池/艺术性格</td><td class="l">《神煞探源》梁湘润（附协纪辨方提要，Word 录入稿）</td><td class="l">SP:s29</td><td class="nw">E3·部分核</td></tr>
+<tr><td class="l"><span class="ev">R-SP-019</span></td><td class="l">神煞·破字/身体</td><td class="l">《神煞探源》梁湘润（附协纪辨方提要，Word 录入稿）</td><td class="l">SP:s30</td><td class="nw">E3·部分核</td></tr>
+<tr><td class="l"><span class="ev">R-SP-020</span></td><td class="l">神煞·明代统计七则</td><td class="l">《神煞探源》梁湘润（附协纪辨方提要，Word 录入稿）</td><td class="l">SP:s30</td><td class="nw">E3·部分核</td></tr>
+<tr><td class="l"><span class="ev">R-SP-022</span></td><td class="l">神煞·子平关/小儿关</td><td class="l">《神煞探源》梁湘润（附协纪辨方提要，Word 录入稿）</td><td class="l">SP:s32</td><td class="nw">E3·部分核</td></tr>
+<tr><td class="l"><span class="ev">R-SP-024</span></td><td class="l">神煞·鬼限/寿限</td><td class="l">《神煞探源》梁湘润（附协纪辨方提要，Word 录入稿）</td><td class="l">SP:s33</td><td class="nw">E3·部分核</td></tr>
+<tr><td class="l"><span class="ev">R-SP-028</span></td><td class="l">神煞·夭年煞/年时相对</td><td class="l">《神煞探源》梁湘润（附协纪辨方提要，Word 录入稿）</td><td class="l">SP:s35</td><td class="nw">E3·部分核</td></tr>
+<tr><td class="l"><span class="ev">R-SP-029</span></td><td class="l">神煞·急脚煞/运程</td><td class="l">《神煞探源》梁湘润（附协纪辨方提要，Word 录入稿）</td><td class="l">SP:s36</td><td class="nw">E3·部分核</td></tr>
+<tr><td class="l"><span class="ev">R-SP-035</span></td><td class="l">神煞·天罗地网/定义</td><td class="l">《神煞探源》梁湘润（附协纪辨方提要，Word 录入稿）</td><td class="l">SP:s41</td><td class="nw">E3·部分核</td></tr>
+<tr><td class="l"><span class="ev">R-SP-037</span></td><td class="l">神煞·天罗地网/会齐即论</td><td class="l">《神煞探源》梁湘润（附协纪辨方提要，Word 录入稿）</td><td class="l">SP:s41</td><td class="nw">E3·部分核</td></tr>
+<tr><td class="l"><span class="ev">R-SP-039</span></td><td class="l">神煞·孤辰寡宿/血光四组</td><td class="l">《神煞探源》梁湘润（附协纪辨方提要，Word 录入稿）</td><td class="l">SP:s42</td><td class="nw">E3·部分核</td></tr>
+<tr><td class="l"><span class="ev">R-SP-044</span></td><td class="l">神煞·空亡/减半之义</td><td class="l">《神煞探源》梁湘润（附协纪辨方提要，Word 录入稿）</td><td class="l">SP:s47</td><td class="nw">E3·部分核</td></tr>
+<tr><td class="l"><span class="ev">R-SP-046</span></td><td class="l">神煞·羊刃/必带官印</td><td class="l">《神煞探源》梁湘润（附协纪辨方提要，Word 录入稿）</td><td class="l">SP:s49</td><td class="nw">E3·部分核</td></tr>
+<tr><td class="l"><span class="ev">R-SP-047</span></td><td class="l">神煞·羊刃/叠位与残疾</td><td class="l">《神煞探源》梁湘润（附协纪辨方提要，Word 录入稿）</td><td class="l">SP:s49</td><td class="nw">E3·部分核</td></tr>
+<tr><td class="l"><span class="ev">R-SP-048</span></td><td class="l">神煞·亡神与劫煞/内外之别</td><td class="l">《神煞探源》梁湘润（附协纪辨方提要，Word 录入稿）</td><td class="l">SP:s51</td><td class="nw">E3·部分核</td></tr>
+<tr><td class="l"><span class="ev">R-SS-002</span></td><td class="l">沈氏·取格/月支优先不论透否</td><td class="l">《沈氏用神例解》梁湘润（简体精校，310 页）</td><td class="l">SS:p11</td><td class="nw">E3·部分核</td></tr>
+<tr><td class="l"><span class="ev">R-SS-017</span></td><td class="l">沈氏·顺逆/善神顺用不善神逆用</td><td class="l">《沈氏用神例解》梁湘润（简体精校，310 页）</td><td class="l">SS:p31</td><td class="nw">E3·部分核</td></tr>
+<tr><td class="l"><span class="ev">R-SS-022</span></td><td class="l">沈氏·逆用/须有反克之神</td><td class="l">《沈氏用神例解》梁湘润（简体精校，310 页）</td><td class="l">SS:p40</td><td class="nw">E3·部分核</td></tr>
+<tr><td class="l"><span class="ev">R-SS-024</span></td><td class="l">沈氏·双格/月柱第一优先</td><td class="l">《沈氏用神例解》梁湘润（简体精校，310 页）</td><td class="l">SS:p41</td><td class="nw">E3·部分核</td></tr>
+<tr><td class="l"><span class="ev">R-SS-028</span></td><td class="l">沈氏·有情/二格相益不论身强弱</td><td class="l">《沈氏用神例解》梁湘润（简体精校，310 页）</td><td class="l">SS:p75</td><td class="nw">E3·部分核</td></tr>
+<tr><td class="l"><span class="ev">R-SS-033</span></td><td class="l">沈氏·相神/二类相神</td><td class="l">《沈氏用神例解》梁湘润（简体精校，310 页）</td><td class="l">SS:p95-96</td><td class="nw">E3·部分核</td></tr>
+<tr><td class="l"><span class="ev">R-SS-036</span></td><td class="l">沈氏·十四制式/总目</td><td class="l">《沈氏用神例解》梁湘润（简体精校，310 页）</td><td class="l">SS:p164-165</td><td class="nw">E3·部分核</td></tr>
+<tr><td class="l"><span class="ev">R-SZ-011</span></td><td class="l">实战·用神/调候为第一（依栏江网）</td><td class="l">《命理实战》梁湘润（简体排印本 52 页）</td><td class="l">SZ:L21</td><td class="nw">E3·部分核</td></tr>
+<tr><td class="l"><span class="ev">R-SZ-012</span></td><td class="l">实战·用神/格局（依子平真诠）</td><td class="l">《命理实战》梁湘润（简体排印本 52 页）</td><td class="l">SZ:L22</td><td class="nw">E3·部分核</td></tr>
+<tr><td class="l"><span class="ev">R-SZ-013</span></td><td class="l">实战·用神/病药</td><td class="l">《命理实战》梁湘润（简体排印本 52 页）</td><td class="l">SZ:L26</td><td class="nw">E3·部分核</td></tr>
+<tr><td class="l"><span class="ev">R-SZ-014</span></td><td class="l">实战·用神/专旺</td><td class="l">《命理实战》梁湘润（简体排印本 52 页）</td><td class="l">SZ:L27-28</td><td class="nw">E3·部分核</td></tr>
+<tr><td class="l"><span class="ev">R-SZ-015</span></td><td class="l">实战·用神/扶抑居第五、身强弱为初阶</td><td class="l">《命理实战》梁湘润（简体排印本 52 页）</td><td class="l">SZ:L29-30</td><td class="nw">E3·部分核</td></tr>
+<tr><td class="l"><span class="ev">R-SZ-016</span></td><td class="l">实战·用神/夏冬生人不论身强弱</td><td class="l">《命理实战》梁湘润（简体排印本 52 页）</td><td class="l">SZ:L19</td><td class="nw">E3·部分核</td></tr>
+<tr><td class="l"><span class="ev">R-SZ-019</span></td><td class="l">实战·大运/十干败亡运·口诀与前提</td><td class="l">《命理实战》梁湘润（简体排印本 52 页）</td><td class="l">SZ:L105-108</td><td class="nw">E3·部分核</td></tr>
+<tr><td class="l"><span class="ev">R-SZ-020</span></td><td class="l">实战·大运/十干败亡运·十干逐条</td><td class="l">《命理实战》梁湘润（简体排印本 52 页）</td><td class="l">SZ:L109,L113-121</td><td class="nw">E3·部分核</td></tr>
+<tr><td class="l"><span class="ev">R-SZ-021</span></td><td class="l">实战·大运/墓库运·只有阴干入墓</td><td class="l">《命理实战》梁湘润（简体排印本 52 页）</td><td class="l">SZ:L122</td><td class="nw">E3·部分核</td></tr>
+<tr><td class="l"><span class="ev">R-SZ-025</span></td><td class="l">实战·大运/空亡大运</td><td class="l">《命理实战》梁湘润（简体排印本 52 页）</td><td class="l">SZ:L286</td><td class="nw">E3·部分核</td></tr>
+<tr><td class="l"><span class="ev">R-SZ-026</span></td><td class="l">实战·大运/接角运·四组交替</td><td class="l">《命理实战》梁湘润（简体排印本 52 页）</td><td class="l">SZ:L295</td><td class="nw">E3·部分核</td></tr>
+<tr><td class="l"><span class="ev">R-SZ-028</span></td><td class="l">实战·大运/提纲（冲提）大运</td><td class="l">《命理实战》梁湘润（简体排印本 52 页）</td><td class="l">SZ:L302</td><td class="nw">E3·部分核</td></tr>
+<tr><td class="l"><span class="ev">R-SZ-030</span></td><td class="l">实战·大运/拱夹与大运</td><td class="l">《命理实战》梁湘润（简体排印本 52 页）</td><td class="l">SZ:L283</td><td class="nw">E3·部分核</td></tr>
+<tr><td class="l"><span class="ev">R-SZ-044</span></td><td class="l">实战·批断/天罗地网宜静</td><td class="l">《命理实战》梁湘润（简体排印本 52 页）</td><td class="l">SZ:L33</td><td class="nw">E3·部分核</td></tr>
+<tr><td class="l"><span class="ev">R01</span></td><td class="l">学理次第（总纲）</td><td class="l">《梁湘润38集视频教程》第1集字幕（工作底本）</td><td class="l">LX38-E01:L53-80</td><td class="nw">E4·部分核</td></tr>
+<tr><td class="l"><span class="ev">R02</span></td><td class="l">学前四条件</td><td class="l">《梁湘润38集视频教程》第1集字幕（工作底本）</td><td class="l">LX38-E01:L123-142</td><td class="nw">E4·部分核</td></tr>
+<tr><td class="l"><span class="ev">R135</span></td><td class="l">纠误·流年非每年有事</td><td class="l">《梁湘润38集视频教程》第18集字幕（工作底本）</td><td class="l">LX38-E18:L1425-1451</td><td class="nw">E4·部分核</td></tr>
+<tr><td class="l"><span class="ev">R20</span></td><td class="l">墓库运</td><td class="l">《梁湘润38集视频教程》第12集字幕（工作底本）</td><td class="l">LX38-E12:L1197-1227</td><td class="nw">E4·部分核</td></tr>
+<tr><td class="l"><span class="ev">R243</span></td><td class="l">格局/外格</td><td class="l">《梁湘润38集视频教程》第34集字幕（工作底本）</td><td class="l">LX38-E34:L983-987</td><td class="nw">E4·部分核</td></tr>
+<tr><td class="l"><span class="ev">R34</span></td><td class="l">格局·取格与透干极限</td><td class="l">《梁湘润38集视频教程》第3集字幕（工作底本）</td><td class="l">LX38-E03:L134-206</td><td class="nw">E4·部分核</td></tr>
+<tr><td class="l"><span class="ev">R36</span></td><td class="l">神煞·天罗地网与四正会</td><td class="l">《梁湘润38集视频教程》第3集字幕（工作底本）</td><td class="l">LX38-E03:L825-865</td><td class="nw">E4·部分核</td></tr>
+<tr><td class="l"><span class="ev">R46</span></td><td class="l">求财·四柱无财与财坐空亡</td><td class="l">《梁湘润38集视频教程》第7集字幕（工作底本）</td><td class="l">LX38-E07:L88-129</td><td class="nw">E4·部分核</td></tr>
+<tr><td class="l"><span class="ev">R52</span></td><td class="l">刑冲合会·拱夹之成立条件</td><td class="l">《梁湘润38集视频教程》第7集字幕（工作底本）</td><td class="l">LX38-E07:L1062-1090</td><td class="nw">E4·部分核</td></tr>
+<tr><td class="l"><span class="ev">R53</span></td><td class="l">刑冲合会·暗拱逢冲为大忌</td><td class="l">《梁湘润38集视频教程》第7集字幕（工作底本）</td><td class="l">LX38-E07:L1120-1135</td><td class="nw">E4·部分核</td></tr>
+<tr><td class="l"><span class="ev">R73</span></td><td class="l">格局·取格法（月令透干）</td><td class="l">《梁湘润38集视频教程》第11集字幕（工作底本）</td><td class="l">LX38-E11:L51-58</td><td class="nw">E4·部分核</td></tr>
+<tr><td class="l"><span class="ev">R74</span></td><td class="l">格局·顺用逆用</td><td class="l">《梁湘润38集视频教程》第11集字幕（工作底本）</td><td class="l">LX38-E11:L120-161</td><td class="nw">E4·部分核</td></tr>
+<tr><td class="l"><span class="ev">JS-SS-01-006</span></td><td class="l">神煞例表（一）·年柱地支查</td><td class="l">《子平基础概要》梁湘润（简体排印本 216 页）</td><td class="l">JC:01｜孤辰｜巳</td><td class="nw">E3·部分核</td></tr>
+<tr><td class="l"><span class="ev">JS-SS-01-018</span></td><td class="l">神煞例表（一）·年柱地支查</td><td class="l">《子平基础概要》梁湘润（简体排印本 216 页）</td><td class="l">JC:01｜寡宿｜巳</td><td class="nw">E3·部分核</td></tr>
+<tr><td class="l"><span class="ev">JS-SS-01-030</span></td><td class="l">神煞例表（一）·年柱地支查</td><td class="l">《子平基础概要》梁湘润（简体排印本 216 页）</td><td class="l">JC:01｜大耗｜巳</td><td class="nw">E3·部分核</td></tr>
+<tr><td class="l"><span class="ev">JS-SS-02-043</span></td><td class="l">神煞例表（二）·月柱地支查</td><td class="l">《子平基础概要》梁湘润（简体排印本 216 页）</td><td class="l">JC:02｜天德｜午</td><td class="nw">E3·部分核</td></tr>
+<tr><td class="l"><span class="ev">JS-SS-02-055</span></td><td class="l">神煞例表（二）·月柱地支查</td><td class="l">《子平基础概要》梁湘润（简体排印本 216 页）</td><td class="l">JC:02｜月德｜午</td><td class="nw">E3·部分核</td></tr>
+<tr><td class="l"><span class="ev">JS-SS-03-063</span></td><td class="l">神煞例表（三）·日柱天干查</td><td class="l">《子平基础概要》梁湘润（简体排印本 216 页）</td><td class="l">JC:03｜天乙贵人｜丙</td><td class="nw">E3·部分核</td></tr>
+<tr><td class="l"><span class="ev">JS-SS-03-073</span></td><td class="l">神煞例表（三）·日柱天干查</td><td class="l">《子平基础概要》梁湘润（简体排印本 216 页）</td><td class="l">JC:03｜文昌贵人｜丙</td><td class="nw">E3·部分核</td></tr>
+<tr><td class="l"><span class="ev">JS-SS-03-082</span></td><td class="l">神煞例表（三）·日柱天干查</td><td class="l">《子平基础概要》梁湘润（简体排印本 216 页）</td><td class="l">JC:03｜羊刃｜丙</td><td class="nw">E3·部分核</td></tr>
+<tr><td class="l"><span class="ev">JS-SS-03-088</span></td><td class="l">神煞例表（三）·日柱天干查</td><td class="l">《子平基础概要》梁湘润（简体排印本 216 页）</td><td class="l">JC:03｜干禄｜丙</td><td class="nw">E3·部分核</td></tr>
+<tr><td class="l"><span class="ev">JS-SS-03-098</span></td><td class="l">神煞例表（三）·日柱天干查</td><td class="l">《子平基础概要》梁湘润（简体排印本 216 页）</td><td class="l">JC:03｜红艳煞｜丙</td><td class="nw">E3·部分核</td></tr>
+<tr><td class="l"><span class="ev">JS-SS-04-112</span></td><td class="l">神煞例表（四）·日柱地支查</td><td class="l">《子平基础概要》梁湘润（简体排印本 216 页）</td><td class="l">JC:04｜将星｜午</td><td class="nw">E3·部分核</td></tr>
+<tr><td class="l"><span class="ev">JS-SS-04-124</span></td><td class="l">神煞例表（四）·日柱地支查</td><td class="l">《子平基础概要》梁湘润（简体排印本 216 页）</td><td class="l">JC:04｜华盖｜午</td><td class="nw">E3·部分核</td></tr>
+<tr><td class="l"><span class="ev">JS-SS-04-136</span></td><td class="l">神煞例表（四）·日柱地支查</td><td class="l">《子平基础概要》梁湘润（简体排印本 216 页）</td><td class="l">JC:04｜驿马｜午</td><td class="nw">E3·部分核</td></tr>
+<tr><td class="l"><span class="ev">JS-SS-04-148</span></td><td class="l">神煞例表（四）·日柱地支查</td><td class="l">《子平基础概要》梁湘润（简体排印本 216 页）</td><td class="l">JC:04｜劫煞｜午</td><td class="nw">E3·部分核</td></tr>
+<tr><td class="l"><span class="ev">JS-SS-04-160</span></td><td class="l">神煞例表（四）·日柱地支查</td><td class="l">《子平基础概要》梁湘润（简体排印本 216 页）</td><td class="l">JC:04｜亡神｜午</td><td class="nw">E3·部分核</td></tr>
+<tr><td class="l"><span class="ev">JS-SS-04-172</span></td><td class="l">神煞例表（四）·日柱地支查</td><td class="l">《子平基础概要》梁湘润（简体排印本 216 页）</td><td class="l">JC:04｜桃花｜午</td><td class="nw">E3·部分核</td></tr>
+<tr><td class="l"><span class="ev">T-ORIG-TH01-029</span></td><td class="l">余氏調候用神表（行卯版原表 10×12，并陈）</td><td class="l">《子平基础概要》行卯版 书内36–37「余氏調候用神表」</td><td class="l">行卯版 书内36（PDF 19）·丙日主·五月格</td><td class="nw">E1·已核</td></tr>
+<tr><td class="l"><span class="ev">T-X11-XJ02-012</span></td><td class="l">七刑七变·七组条文与方阵四角刑（124格）</td><td class="l">《四角方阵刑冲合会透解》行卯版·七刑方阵</td><td class="l">PDF 16（书内32/33）·本组「七刑」栏</td><td class="nw">E1·已核</td></tr>
+</table>
+<footer>证据 78 条　·　正文 21878 字　·　分　析　报　告　终</footer>
+</div>
+</div>
+</body>
+</html>
