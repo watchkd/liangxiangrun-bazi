@@ -1448,7 +1448,8 @@ def check_promo_tail():
     # 命书嵌入：mingshu.py 须含内嵌逻辑，命书样例 HTML 须真嵌了推广块
     ms = io.open(os.path.join(ROOT, "tools", "mingshu.py"),
                  encoding="utf-8", errors="replace").read()
-    for kw in ("_promo_html", "appreciation.jpg", "data:image/jpeg;base64", "苍盘"):
+    for kw in ("_promo_html", "appreciation.jpg", "data:image/jpeg;base64", "苍盘",
+               "梁湘润体系分析结果"):
         if kw not in ms:
             bad.append("mingshu.py 缺命书嵌入要素「%s」" % kw)
     ms_htmls = sorted(glob.glob(os.path.join(ROOT, "_命书", "命书_*.html")))
