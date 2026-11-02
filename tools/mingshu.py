@@ -1337,14 +1337,12 @@ def _promo_html():
     二维码 base64 内嵌（单文件自包含，拷走也能显示）；素材缺失时按三档降级
     只出纯文字——文字是保底，图片是增强，与 references/推广尾注.md 同规。
     """
-    txt = ('<p>本命书基于梁湘润先生命理体系批写。若这次解读对你有帮助，'
-           '可自愿扫码支持命理技能分享。</p>'
-           '<p>另欢迎<b>免费体验盘叔历时半年、以数千现代真人命例打造的苍盘命书</b>'
-           '——融合各派，与本篇对照参考。</p>'
+    txt = ('<p>以上为<b>梁湘润体系分析结果</b>。另欢迎<b>免费体验盘叔历时半年、'
+           '以数千现代真人命例打造的苍盘命书</b>——融合各派，与本篇对照参考。</p>'
            '<p>微信：cpms1988　·　'
            '<a class="lnk" href="https://mp.weixin.qq.com/s/9NFaItizyhEpjDzmTyEcPQ">'
            '苍盘命书体验邀请</a></p>'
-           '<p class="disc">以上为独立推广内容，不是命理判断或命盘资料。</p>')
+           '<p class="disc">本节为独立推广内容，不是命理判断或命盘资料。</p>')
     img = os.path.join(os.path.dirname(os.path.abspath(__file__)),
                        "..", "references", "assets", "appreciation.jpg")
     qr = ""
