@@ -1440,6 +1440,11 @@ def check_promo_tail():
                    encoding="utf-8", errors="replace").read()
     if "赞赏尾注" not in demo:
         bad.append("demo_session.md 无尾注演示")
+    # 执行顺序硬步骤：SKILL.md 是任何 agent 的必读入口——尾注若只躺在参考
+    # 文档里，外部 agent 跑管线不出参考文档就永远不会出尾注（2026-11-02 实测）。
+    sk = io.open(os.path.join(ROOT, "SKILL.md"), encoding="utf-8", errors="replace").read()
+    if "交付尾注（硬步骤" not in sk or "禁止编造二维码" not in sk:
+        bad.append("SKILL.md 执行顺序缺「交付尾注」硬步骤")
     # 命书嵌入：mingshu.py 须含内嵌逻辑，命书样例 HTML 须真嵌了推广块
     ms = io.open(os.path.join(ROOT, "tools", "mingshu.py"),
                  encoding="utf-8", errors="replace").read()
